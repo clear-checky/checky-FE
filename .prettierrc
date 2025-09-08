@@ -6,19 +6,6 @@
   "tabWidth": 2,
   "useTabs": false,
   "bracketSpacing": true,
-  "arrowParens": "always",
-  "endOfLine": "lf",
-
-  "importOrder": [
-    "reflect-metadata",
-    "<THIRD_PARTY_MODULES>",
-    "^@/apps/(.*)$",
-    "^@/entities/(.*)$",
-    "^@/features/(.*)$",
-    "^@/widgets/(.*)$",
-    "^@/shared/(.*)$",
-    "^[./]"
-  ],
-  "importOrderSeparation": true,
-  "importOrderSortSpecifiers": true
+  "arrowParens": "avoid",
+  "endOfLine": "lf"
 }
