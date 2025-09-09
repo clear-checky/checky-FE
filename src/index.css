@@ -27,3 +27,14 @@ body {
   font-family: 'Inter', sans-serif;
   font-size: 16px;
 }
+
+/* 프린트 부분  */
+@media print {
+   body { zoom: 0.8; } 
+
+   * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+.shadow, .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; }
+}
