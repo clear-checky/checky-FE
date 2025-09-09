@@ -23,7 +23,21 @@ export default function UploadPage() {
             </p>
           </div>
 
-          {/* 여기에 업로드 기능들이 들어갈 예정 */}
+          {/* 파일 드래그 앤 드롭 영역 */}
+          <div className="border-2 border-dashed border-light-gray/60 rounded-[10px] p-12 text-center hover:border-secondary/60 transition-colors">
+            <div className="text-gray mb-4">
+              첨부할 파일을 여기에 끌어다 놓거나, 파일 선택 버튼을 눌러 파일을
+              직접 선택해 주세요.
+            </div>
+
+            {/* 파일 선택 버튼 */}
+            <button
+              type="button"
+              className="bg-secondary text-white px-6 py-3 rounded-[10px] font-semibold hover:opacity-90 transition-opacity"
+            >
+              파일선택
+            </button>
+          </div>
         </div>
       </div>
     </div>
