@@ -1,4 +1,31 @@
+import React, { useRef, useState } from 'react';
+
 export default function UploadPage() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
+  // 파일 선택 핸들러
+  const handleFileSelect = (file: File) => {
+    // 파일 크기 체크 (20MB)
+    if (file.size > 20 * 1024 * 1024) {
+      alert('파일 크기는 20MB를 초과할 수 없습니다.');
+      return;
+    }
+
+    setUploadedFile(file);
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  };
+
+  // 파일 선택 버튼 클릭 핸들러
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
+  };
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-5xl px-6 py-10">
@@ -33,10 +60,20 @@ export default function UploadPage() {
             {/* 파일 선택 버튼 */}
             <button
               type="button"
+              onClick={handleFileButtonClick}
               className="bg-secondary text-white px-6 py-3 rounded-[10px] font-semibold hover:opacity-90 transition-opacity"
             >
               파일선택
             </button>
+
+            {/* 숨겨진 파일 입력 */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              onChange={handleFileInputChange}
+              accept=".pdf,.doc,.docx,.hwp,.txt"
+            />
           </div>
         </div>
       </div>
