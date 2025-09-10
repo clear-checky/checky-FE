@@ -1,11 +1,76 @@
 import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+// API 호출 함수들
+const API_BASE_URL = 'http://localhost:8000'; // FastAPI 서버 URL
+const USE_MOCK_DATA = true; // 백엔드 준비 전까지 Mock 데이터 사용
+
+// Mock 데이터 함수들
+const mockUploadFile = async (file: File) => {
+  // 실제 API 호출을 시뮬레이션
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  return { task_id: `task_${Date.now()}` };
+};
+
+const mockCheckAnalysisStatus = async (taskId: string) => {
+  // 실제 API 호출을 시뮬레이션
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  // 랜덤하게 상태 반환 (테스트용)
+  const random = Math.random();
+  if (random < 0.3) {
+    return { status: 'processing' };
+  } else if (random < 0.9) {
+    return { status: 'completed' };
+  } else {
+    return { status: 'failed' };
+  }
+};
+
+// 실제 API 호출 함수들
+const uploadFile = async (file: File) => {
+  if (USE_MOCK_DATA) {
+    return mockUploadFile(file);
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_BASE_URL}/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('파일 업로드에 실패했습니다.');
+  }
+
+  return response.json();
+};
+
+const checkAnalysisStatus = async (taskId: string) => {
+  if (USE_MOCK_DATA) {
+    return mockCheckAnalysisStatus(taskId);
+  }
+
+  const response = await fetch(`${API_BASE_URL}/analysis/status/${taskId}`);
+
+  if (!response.ok) {
+    throw new Error('분석 상태 확인에 실패했습니다.');
+  }
+
+  return response.json();
+};
 
 export default function UploadPage() {
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isAgreed, setIsAgreed] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [taskId, setTaskId] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   // 파일 선택 핸들러
   const handleFileSelect = (file: File) => {
@@ -30,8 +95,29 @@ export default function UploadPage() {
     fileInputRef.current?.click();
   };
 
+  // 드래그 앤 드롭 핸들러들
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  };
+
   // 분석하기 버튼 클릭 핸들러
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (!uploadedFile) {
       alert('파일을 선택해주세요.');
       return;
@@ -42,22 +128,47 @@ export default function UploadPage() {
       return;
     }
 
-    setIsAnalyzing(true);
-    setLoadingProgress(0);
+    try {
+      setIsAnalyzing(true);
+      setLoadingProgress(0);
 
-    // 로딩 진행률 애니메이션
-    const interval = setInterval(() => {
-      setLoadingProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          // TODO: 실제 분석 API 호출 및 분석 페이지로 이동
-          return 100;
+      // 1. 파일 업로드
+      setLoadingProgress(20);
+      const uploadResult = await uploadFile(uploadedFile);
+      setTaskId(uploadResult.task_id);
+
+      // 2. 분석 상태 확인 (폴링)
+      const checkStatus = async () => {
+        try {
+          const statusResult = await checkAnalysisStatus(uploadResult.task_id);
+
+          if (statusResult.status === 'completed') {
+            setLoadingProgress(100);
+            // 분석 완료 후 분석 페이지로 이동
+            setTimeout(() => {
+              navigate('/analyze', { state: { taskId: uploadResult.task_id } });
+            }, 1000);
+          } else if (statusResult.status === 'processing') {
+            // 진행률 업데이트 (20% → 90%)
+            setLoadingProgress(prev => Math.min(prev + 10, 90));
+            setTimeout(checkStatus, 2000); // 2초마다 확인
+          } else if (statusResult.status === 'failed') {
+            throw new Error('분석에 실패했습니다.');
+          }
+        } catch (error) {
+          console.error('분석 상태 확인 실패:', error);
+          alert('분석 중 오류가 발생했습니다.');
+          setIsAnalyzing(false);
         }
-        return prev + 2;
-      });
-    }, 100);
+      };
 
-    console.log('분석 시작:', uploadedFile.name);
+      // 3. 분석 상태 확인 시작
+      setTimeout(checkStatus, 1000);
+    } catch (error) {
+      console.error('분석 시작 실패:', error);
+      alert('파일 업로드에 실패했습니다.');
+      setIsAnalyzing(false);
+    }
   };
   return (
     <div className="min-h-screen bg-white">
@@ -84,7 +195,16 @@ export default function UploadPage() {
           </div>
 
           {/* 파일 드래그 앤 드롭 영역 */}
-          <div className="border-2 border-dashed border-primary/60 rounded-[10px] p-12 text-center hover:border-secondary/60 transition-colors bg-primary/20">
+          <div
+            className={`border-2 border-dashed rounded-[10px] p-12 text-center transition-colors ${
+              isDragOver
+                ? 'border-secondary bg-secondary/10'
+                : 'border-primary/60 hover:border-secondary/60 bg-primary/20'
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
             <div className="text-gray mb-4">
               첨부할 파일을 여기에 끌어다 놓거나, 파일 선택 버튼을 눌러 파일을
               직접 선택해 주세요.
