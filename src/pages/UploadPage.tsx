@@ -27,6 +27,22 @@ export default function UploadPage() {
   const handleFileButtonClick = () => {
     fileInputRef.current?.click();
   };
+
+  // 분석하기 버튼 클릭 핸들러
+  const handleAnalyze = () => {
+    if (!uploadedFile) {
+      alert('파일을 선택해주세요.');
+      return;
+    }
+
+    if (!isAgreed) {
+      alert('개인정보 처리방침에 동의해주세요.');
+      return;
+    }
+
+    // TODO: 실제 분석 API 호출 및 분석 페이지로 이동
+    console.log('분석 시작:', uploadedFile.name);
+  };
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-5xl px-6 py-10">
@@ -129,6 +145,22 @@ export default function UploadPage() {
                 </a>
               </span>
             </label>
+          </div>
+
+          {/* 분석하기 버튼 */}
+          <div className="mt-8 flex justify-end">
+            <button
+              type="button"
+              onClick={handleAnalyze}
+              disabled={!uploadedFile || !isAgreed}
+              className={`px-8 py-3 rounded-[10px] font-bold transition-opacity ${
+                uploadedFile && isAgreed
+                  ? 'bg-secondary text-white hover:opacity-90'
+                  : 'bg-gray/30 text-gray cursor-not-allowed'
+              }`}
+            >
+              분석하기
+            </button>
           </div>
         </div>
       </div>
