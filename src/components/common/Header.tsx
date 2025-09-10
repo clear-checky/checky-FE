@@ -11,7 +11,7 @@ export default function Header() {
         <div className="flex items-center space-x-2">
           {/* 로고 */}
           <div className="w-12 h-12">
-            <img src="/logo.svg" alt="Checky" />
+            <img src={logo} alt="Checky" />
           </div>
           <div className="text-[24px] font-bold text-black">Checky</div>
           <div className="text-[12px] text-gray">

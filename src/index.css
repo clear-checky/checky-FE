@@ -28,6 +28,24 @@ body {
   font-size: 16px;
 }
 
+/* 스크롤바 스타일링 */
+.chat-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+.chat-container::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
 /* 프린트 부분  */
 @media print {
    body { zoom: 0.8; } 
@@ -38,3 +56,4 @@ body {
   }
 .shadow, .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; }
 }
+
