@@ -16,7 +16,7 @@
     rgba(255, 255, 255, 0.8) 0%,
     #dfede7 15%,
     #b9c9c2 27%,
-    #569077 50%,
+    #567d6d 50%,
     #000000 100%
   );
 }
@@ -45,3 +45,15 @@ body {
 .chat-container::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
+
+/* 프린트 부분  */
+@media print {
+   body { zoom: 0.8; } 
+
+   * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+.shadow, .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; }
+}
+
