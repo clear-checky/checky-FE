@@ -51,7 +51,7 @@ export default function UploadPage() {
           </div>
 
           {/* 파일 드래그 앤 드롭 영역 */}
-          <div className="border-2 border-dashed border-light-gray/60 rounded-[10px] p-12 text-center hover:border-secondary/60 transition-colors">
+          <div className="border-2 border-dashed border-primary/60 rounded-[10px] p-12 text-center hover:border-secondary/60 transition-colors bg-primary/20">
             <div className="text-gray mb-4">
               첨부할 파일을 여기에 끌어다 놓거나, 파일 선택 버튼을 눌러 파일을
               직접 선택해 주세요.
@@ -78,7 +78,7 @@ export default function UploadPage() {
 
           {/* 업로드된 파일 표시 */}
           {uploadedFile && (
-            <div className="mt-4 p-4 bg-gray/10 rounded-[10px] flex items-center justify-between">
+            <div className="mt-4 p-4 bg-white rounded-[10px] border border-light-gray/60 shadow-sm flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-secondary/20 rounded flex items-center justify-center">
                   <svg
@@ -107,7 +107,7 @@ export default function UploadPage() {
                 onClick={() => setUploadedFile(null)}
                 className="text-gray hover:text-red transition-colors"
               >
-                삭제 ×
+                삭제
               </button>
             </div>
           )}
