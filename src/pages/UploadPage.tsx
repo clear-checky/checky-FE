@@ -3,6 +3,7 @@ import React, { useRef, useState } from 'react';
 export default function UploadPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isAgreed, setIsAgreed] = useState(false);
 
   // 파일 선택 핸들러
   const handleFileSelect = (file: File) => {
@@ -111,6 +112,24 @@ export default function UploadPage() {
               </button>
             </div>
           )}
+
+          {/* 개인정보 동의 체크박스 */}
+          <div className="mt-6">
+            <label className="flex items-start space-x-3">
+              <input
+                type="checkbox"
+                checked={isAgreed}
+                onChange={e => setIsAgreed(e.target.checked)}
+                className="mt-1 w-4 h-4 text-secondary border-gray-300 rounded focus:ring-secondary accent-secondary"
+              />
+              <span className="text-sm text-gray">
+                개인정보 처리방침에 동의합니다.
+                <a href="#" className="text-secondary underline ml-1">
+                  자세히 보기
+                </a>
+              </span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
