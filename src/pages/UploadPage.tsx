@@ -272,13 +272,14 @@ export default function UploadPage() {
                 type="checkbox"
                 checked={isAgreed}
                 onChange={e => setIsAgreed(e.target.checked)}
-                className="mt-1 w-4 h-4 text-secondary border-gray-300 rounded focus:ring-secondary accent-secondary"
+                className="w-4 h-4 text-secondary border-gray-300 rounded focus:ring-secondary accent-secondary flex-shrink-0 mt-0.5"
               />
-              <span className="text-sm text-gray">
-                개인정보 처리방침에 동의합니다.
-                <a href="#" className="text-secondary underline ml-1">
-                  자세히 보기
-                </a>
+              <span className="text-sm text-gray leading-relaxed">
+                AI가 계약서를 분석하는 과정에서 성명, 연락처 등 일부 개인정보가
+                일시적으로 활용될 수 있습니다. 이 정보는 계약서 분석 목적 외에는
+                사용되지 않으며, 어떠한 경우에도 제3자에게 제공되지 않습니다.
+                모든 개인정보는 24시간이 지나면 복구할 수 없도록 영구적으로
+                삭제됩니다. 이에 동의합니다.
               </span>
             </label>
           </div>
