@@ -1,6 +1,6 @@
 // src/api/api.ts
-// 프론트 → FastAPI 호출 헬퍼
-// Vite 환경변수: .env.local에 VITE_API_BASE_URL=http://127.0.0.1:8000
+// 프론트 ↔ FastAPI 헬퍼
+// .env.local 예) VITE_API_BASE_URL=http://127.0.0.1:8000
 
 export type RiskLevel = "danger" | "warning" | "safe";
 
@@ -41,24 +41,28 @@ async function request<T>(
   const id = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
+    const isForm = init.body instanceof FormData;
     const res = await fetch(`${BASE_URL}${path}`, {
-      headers: { "Content-Type": "application/json", ...(init.headers || {}) },
+      // FormData면 Content-Type 자동 설정되도록 header 생략
+      headers: isForm
+        ? { ...(init.headers || {}) }
+        : { "Content-Type": "application/json", ...(init.headers || {}) },
       signal: controller.signal,
       ...init,
     });
 
     if (!res.ok) {
-      // 서버가 보낸 에러 메시지 추출 시도
       let detail = "";
       try {
         const body = await res.json();
         detail = body?.detail || JSON.stringify(body);
-      } catch (_) {
+      } catch {
         detail = res.statusText;
       }
       throw new Error(`[${res.status}] ${detail}`);
     }
 
+    // 모든 API가 JSON 반환한다고 가정 (필요 시 분기)
     return (await res.json()) as T;
   } catch (err: any) {
     if (err?.name === "AbortError") {
@@ -70,7 +74,7 @@ async function request<T>(
   }
 }
 
-/** 계약서 분석 */
+/** ───── 분석(동기) : 바로 문장 배열을 보내서 분석 ───── */
 export function analyzeContract(articles: Article[]) {
   return request<AnalyzeResponse>("/contract/analyze", {
     method: "POST",
@@ -78,7 +82,7 @@ export function analyzeContract(articles: Article[]) {
   });
 }
 
-/** 계약서 기반 Q&A */
+/** ───── 챗봇 Q&A ───── */
 export function askChecky(question: string, articles: Article[]) {
   return request<ChatResponse>("/contract/chat", {
     method: "POST",
@@ -86,7 +90,34 @@ export function askChecky(question: string, articles: Article[]) {
   });
 }
 
-/** 헬스 체크 */
+/** ───── 헬스 체크 ───── */
 export function health() {
   return request<{ ok: boolean }>("/health", { method: "GET" });
+}
+
+/** ───── OCR 파이프라인: 업로드 → 상태 → 결과 ───── */
+// 1) 파일 업로드 → { task_id }
+export function uploadFile(file: File) {
+  const fd = new FormData();
+  fd.append("file", file);
+  return request<{ task_id: string }>("/upload", {
+    method: "POST",
+    body: fd,
+  });
+}
+
+// 2) 상태 조회 → { status: 'queued'|'processing'|'completed'|'failed' }
+export function getAnalysisStatus(taskId: string) {
+  return request<{ status: "queued" | "processing" | "completed" | "failed" }>(
+    `/analysis/status/${encodeURIComponent(taskId)}`,
+    { method: "GET" }
+  );
+}
+
+// 3) 결과 조회 → AnalyzeResponse 형태라면 그대로 UI에 사용 가능
+export function getAnalysisResult(taskId: string) {
+  return request<AnalyzeResponse>(
+    `/analysis/result/${encodeURIComponent(taskId)}`,
+    { method: "GET" }
+  );
 }

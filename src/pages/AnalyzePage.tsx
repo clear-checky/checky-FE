@@ -1,18 +1,16 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import SectionHeader from "../components/SectionHeader";
 import ClauseCard from "../components/ClauseCard";
 import SafetyScoreBar from "../components/SafetyScoreBar";
 import type { Article } from "../components/types";
-import { analyzeContract } from "../api/api"; // API 호출
+import { analyzeContract, getAnalysisResult } from "../api/api";
 
 type Counts = { danger: number; warning: number; safe: number; total: number };
 
 // 문장 위험도 집계
 const computeCounts = (articles: Article[]): Counts => {
-  let danger = 0,
-    warning = 0,
-    safe = 0,
-    total = 0;
+  let danger = 0, warning = 0, safe = 0, total = 0;
   for (const a of articles) {
     for (const s of a.sentences) {
       total += 1;
@@ -51,21 +49,36 @@ const MOCK: Article[] = [
 ];
 
 export default function AnalyzePage() {
+  const { taskId } = useParams<{ taskId?: string }>();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errMsg, setErrMsg] = useState<string | null>(null);
 
-  // API → 실패하면 Mock 사용
+  // API → taskId가 있으면 결과 조회, 없으면 기존 analyzeContract(MOCK)
   useEffect(() => {
-    analyzeContract(MOCK)
-      .then((res) => {
-        setArticles(res.articles);
-      })
-      .catch((err) => {
-        console.error("API 실패 → Mock data 사용", err);
-        setArticles(MOCK);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    const run = async () => {
+      setLoading(true);
+      setErrMsg(null);
+      try {
+        if (taskId) {
+          // 백엔드 파이프라인 결과 사용
+          const res = await getAnalysisResult(taskId);
+          setArticles(res.articles as Article[]);
+        } else {
+          // 기존 동작 유지: 데모/직접 접근 시
+          const res = await analyzeContract(MOCK);
+          setArticles(res.articles as Article[]);
+        }
+      } catch (err: any) {
+        console.error("분석 결과 로드 실패:", err);
+        setErrMsg(err?.message ?? "분석 결과를 불러오지 못했습니다.");
+        setArticles(MOCK); // 안전한 폴백
+      } finally {
+        setLoading(false);
+      }
+    };
+    run();
+  }, [taskId]);
 
   const counts = useMemo(() => computeCounts(articles), [articles]);
   const safetyPercent = useMemo(() => {
@@ -82,7 +95,15 @@ export default function AnalyzePage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-5xl px-6 py-10">
-        <h1 className="text-3xl font-extrabold text-black mb-6">아르바이트 근로 계약서</h1>
+        <h1 className="text-3xl font-extrabold text-black mb-6">
+          아르바이트 근로 계약서 
+        </h1>
+
+        {errMsg && (
+          <div className="mb-4 rounded-[10px] bg-red/10 p-3 text-sm text-red">
+            {errMsg} (임시로 데모 데이터를 표시합니다)
+          </div>
+        )}
 
         <SectionHeader
           title="계약서 요약"
