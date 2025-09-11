@@ -14,10 +14,11 @@
 .bg-gradient-primary {
   background: linear-gradient(
     rgba(255, 255, 255, 0.8) 0%,
-    #dfede7 15%,
-    #b9c9c2 27%,
-    #567d6d 50%,
-    #000000 100%
+    #FFFFFF 0%,
+    #DFEDE7 30%,
+    #B9C9C2 59%,
+    #85AA9A 73%,
+    #577467 91%
   );
 }
 

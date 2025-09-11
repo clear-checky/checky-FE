@@ -10,12 +10,15 @@ type Counts = { danger: number; warning: number; safe: number; total: number };
 
 // 문장 위험도 집계
 const computeCounts = (articles: Article[]): Counts => {
-  let danger = 0, warning = 0, safe = 0, total = 0;
+  let danger = 0,
+    warning = 0,
+    safe = 0,
+    total = 0;
   for (const a of articles) {
     for (const s of a.sentences) {
       total += 1;
-      if (s.risk === "danger") danger += 1;
-      else if (s.risk === "warning") warning += 1;
+      if (s.risk === 'danger') danger += 1;
+      else if (s.risk === 'warning') warning += 1;
       else safe += 1;
     }
   }
@@ -53,6 +56,7 @@ export default function AnalyzePage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState<string | null>(null);
+
 
   // API → taskId가 있으면 결과 조회, 없으면 기존 analyzeContract(MOCK)
   useEffect(() => {
@@ -105,6 +109,7 @@ export default function AnalyzePage() {
           </div>
         )}
 
+
         <SectionHeader
           title="계약서 요약"
           subtitle="조항을 클릭하면 상세 위험 문장과 수정 권고를 확인할 수 있어요."
@@ -123,6 +128,7 @@ export default function AnalyzePage() {
               <span className="font-extrabold text-green text-[36px] px-3">{safetyPercent}%</span> 입니다.
             </p>
             <SafetyScoreBar danger={counts.danger} warning={counts.warning} safe={counts.safe} />
+
           </div>
         </div>
       </div>
