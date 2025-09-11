@@ -188,6 +188,7 @@ export default function UploadPage() {
             onFileInputChange={handleFileInputChange}
             uploadedFile={uploadedFile}
             onRemoveFile={handleRemoveFile}
+            fileInputRef={fileInputRef}
           />
 
           {/* 개인정보 동의 체크박스 */}

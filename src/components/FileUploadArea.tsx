@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 
 interface FileUploadAreaProps {
   isDragOver: boolean;
@@ -9,6 +9,7 @@ interface FileUploadAreaProps {
   onFileInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   uploadedFile: File | null;
   onRemoveFile: () => void;
+  fileInputRef: React.RefObject<HTMLInputElement>;
 }
 
 export default function FileUploadArea({
@@ -20,9 +21,8 @@ export default function FileUploadArea({
   onFileInputChange,
   uploadedFile,
   onRemoveFile,
+  fileInputRef,
 }: FileUploadAreaProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   return (
     <div className="space-y-6">
       {/* 파일 업로드 규칙 */}
@@ -35,53 +35,34 @@ export default function FileUploadArea({
           • 파일은 한번에 하나만 업로드 할 수 있으며, 파일 1개 당 크기는 20MB를
           초과할 수 없습니다.
         </p>
-        <p className="text-sm text-gray">
-          • 업로드된 파일은 24시간 후 자동으로 삭제됩니다.
-        </p>
       </div>
 
-      {/* 파일 선택 박스 */}
+      {/* 파일 드래그 앤 드롭 영역 */}
       <div
-        className={`border-2 border-dashed rounded-[10px] p-8 text-center transition-colors ${
+        className={`border-2 border-dashed rounded-[10px] p-12 text-center transition-colors ${
           isDragOver
-            ? 'border-secondary bg-secondary/5'
-            : 'border-gray-300 bg-light-green hover:border-secondary hover:bg-secondary/5'
+            ? 'border-secondary bg-secondary/10'
+            : 'border-primary/60 hover:border-secondary/60 bg-primary/20'
         }`}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
       >
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center">
-            <svg
-              className="w-6 h-6 text-secondary"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-              />
-            </svg>
-          </div>
-          <div>
-            <p className="text-base font-medium text-black mb-1">
-              파일을 드래그하거나 클릭하여 업로드하세요
-            </p>
-            <p className="text-sm text-gray">
-              PDF, DOC, DOCX, HWP, TXT, JPG, JPEG, PNG 파일 지원
-            </p>
-          </div>
-          <button
-            onClick={onFileButtonClick}
-            className="px-6 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors"
-          >
-            파일 선택
-          </button>
+        <div className="text-gray mb-4">
+          첨부할 파일을 여기에 끌어다 놓거나, 파일 선택 버튼을 눌러 파일을 직접
+          선택해 주세요.
         </div>
+
+        {/* 파일 선택 버튼 */}
+        <button
+          type="button"
+          onClick={onFileButtonClick}
+          className="bg-secondary text-white px-6 py-3 rounded-[10px] font-semibold hover:opacity-90 transition-opacity"
+        >
+          파일선택
+        </button>
+
+        {/* 숨겨진 파일 입력 */}
         <input
           ref={fileInputRef}
           type="file"
@@ -93,52 +74,35 @@ export default function FileUploadArea({
 
       {/* 업로드된 파일 표시 */}
       {uploadedFile && (
-        <div className="bg-white border border-light-gray/60 rounded-[10px] p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-secondary/10 rounded-full flex items-center justify-center">
-                <svg
-                  className="w-4 h-4 text-secondary"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-black">
-                  {uploadedFile.name}
-                </p>
-                <p className="text-xs text-gray">
-                  {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={onRemoveFile}
-              className="text-gray-400 hover:text-red-500 transition-colors"
-            >
+        <div className="mt-4 p-4 bg-white rounded-[10px] border border-light-gray/60 shadow-sm flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-secondary/20 rounded flex items-center justify-center">
               <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                className="w-4 h-4 text-secondary"
+                fill="currentColor"
+                viewBox="0 0 20 20"
               >
                 <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  fillRule="evenodd"
+                  d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                  clipRule="evenodd"
                 />
               </svg>
-            </button>
+            </div>
+            <div>
+              <div className="font-medium text-black">{uploadedFile.name}</div>
+              <div className="text-sm text-gray">
+                {Math.round(uploadedFile.size / 1024)}KB
+              </div>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={onRemoveFile}
+            className="text-gray hover:text-red transition-colors"
+          >
+            삭제
+          </button>
         </div>
       )}
     </div>
