@@ -1,132 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// API 호출 함수들
-const API_BASE_URL = 'http://localhost:8000'; // FastAPI 서버 URL
-const USE_MOCK_DATA = false; // 백엔드 연결 문제로 임시 Mock 데이터 사용
-
-// Mock 데이터 함수들
-const mockUploadFile = async (file: File) => {
-  // 실제 API 호출을 시뮬레이션
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  return {
-    success: true,
-    message: '파일이 성공적으로 업로드되었습니다.',
-    file_id: `file_${Date.now()}`,
-    file_name: file.name,
-    file_size: file.size,
-    file_type: file.type.split('/')[1],
-    extracted_text: `<<${file.name}>>\n\n- 이 파일은 Mock 데이터로 생성된 추출 텍스트입니다.\n- 실제 OCR 추출 결과를 시뮬레이션합니다.\n- 계약서 분석을 위한 텍스트 내용이 여기에 표시됩니다.`,
-  };
-};
-
-const mockCheckAnalysisStatus = async (fileId: string) => {
-  // 실제 API 호출을 시뮬레이션
-  await new Promise(resolve => setTimeout(resolve, 500));
-
-  // 랜덤하게 상태 반환 (테스트용)
-  const random = Math.random();
-  if (random < 0.3) {
-    return 'processing';
-  } else if (random < 0.9) {
-    return 'completed';
-  } else {
-    return 'failed';
-  }
-};
-
-// 실제 API 호출 함수들
-const uploadFile = async (file: File) => {
-  if (USE_MOCK_DATA) {
-    return mockUploadFile(file);
-  }
-
-  console.log('파일 업로드 시작:', file.name);
-  const formData = new FormData();
-  formData.append('file', file);
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/upload`, {
-      method: 'POST',
-      body: formData,
-    });
-
-    console.log('업로드 응답 상태:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('업로드 실패:', response.status, errorText);
-      throw new Error(`파일 업로드에 실패했습니다. (${response.status})`);
-    }
-
-    const result = await response.json();
-    console.log('업로드 성공:', result);
-    return result;
-  } catch (error) {
-    console.error('업로드 에러:', error);
-    throw error;
-  }
-};
-
-const checkAnalysisStatus = async (fileId: string) => {
-  if (USE_MOCK_DATA) {
-    return mockCheckAnalysisStatus(fileId);
-  }
-
-  console.log('상태 확인 시작:', fileId);
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/upload/status/${fileId}`);
-    console.log('상태 확인 응답:', response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('상태 확인 실패:', response.status, errorText);
-      throw new Error(`분석 상태 확인에 실패했습니다. (${response.status})`);
-    }
-
-    const data = await response.json();
-    console.log('상태 확인 성공:', data);
-    return data.status; // 백엔드에서 JSON 객체의 status 필드 반환
-  } catch (error) {
-    console.error('상태 확인 에러:', error);
-    throw error;
-  }
-};
-
-const getAnalysisResult = async (fileId: string) => {
-  if (USE_MOCK_DATA) {
-    // Mock 데이터로 분석 결과 반환
-    return {
-      id: fileId,
-      title: '계약서 분석 결과',
-      articles: [
-        {
-          id: '1',
-          title: '계약서 조항 1',
-          sentences: [
-            {
-              id: '1-1',
-              text: '이 계약서는 안전합니다.',
-              risk: 'safe' as const,
-              why: '표준 계약 조건을 따르고 있습니다.',
-              fix: '추가 조치 불필요',
-            },
-          ],
-        },
-      ],
-    };
-  }
-
-  // 백엔드에서 분석 결과 API 호출
-  const response = await fetch(`${API_BASE_URL}/upload/analysis/${fileId}`);
-
-  if (!response.ok) {
-    throw new Error('분석 결과를 가져오는데 실패했습니다.');
-  }
-
-  return response.json();
-};
+import {
+  uploadFile,
+  checkAnalysisStatus,
+  getAnalysisResult,
+} from '../api/uploadApi';
+import FileUploadArea from '../components/FileUploadArea';
+import LoadingModal from '../components/LoadingModal';
 
 export default function UploadPage() {
   const navigate = useNavigate();
@@ -135,7 +15,6 @@ export default function UploadPage() {
   const [isAgreed, setIsAgreed] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const [fileId, setFileId] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [pollingCount, setPollingCount] = useState(0);
 
@@ -183,6 +62,11 @@ export default function UploadPage() {
     }
   };
 
+  // 파일 제거 핸들러
+  const handleRemoveFile = () => {
+    setUploadedFile(null);
+  };
+
   // 분석하기 버튼 클릭 핸들러
   const handleAnalyze = async () => {
     if (!uploadedFile) {
@@ -203,7 +87,6 @@ export default function UploadPage() {
       // 1. 파일 업로드
       setLoadingProgress(20);
       const uploadResult = await uploadFile(uploadedFile);
-      setFileId(uploadResult.file_id);
 
       // 2. 분석 상태 확인 (폴링)
       const checkStatus = async () => {
@@ -295,88 +178,17 @@ export default function UploadPage() {
             계약서 분석하기
           </h2>
 
-          {/* 파일 업로드 규칙 */}
-          <div className="mb-6 space-y-2">
-            <p className="text-sm text-gray">
-              • 등록 가능한 파일 형식은 .pdf, .doc, .docx, .hwp, .txt, .jpg,
-              .jpeg, .png 입니다.
-            </p>
-            <p className="text-sm text-gray">
-              • 파일은 한번에 하나만 업로드 할 수 있으며, 파일 1개 당 크기는
-              20MB를 초과할 수 없습니다.
-            </p>
-          </div>
-
-          {/* 파일 드래그 앤 드롭 영역 */}
-          <div
-            className={`border-2 border-dashed rounded-[10px] p-12 text-center transition-colors ${
-              isDragOver
-                ? 'border-secondary bg-secondary/10'
-                : 'border-primary/60 hover:border-secondary/60 bg-primary/20'
-            }`}
+          {/* 파일 업로드 영역 */}
+          <FileUploadArea
+            isDragOver={isDragOver}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-          >
-            <div className="text-gray mb-4">
-              첨부할 파일을 여기에 끌어다 놓거나, 파일 선택 버튼을 눌러 파일을
-              직접 선택해 주세요.
-            </div>
-
-            {/* 파일 선택 버튼 */}
-            <button
-              type="button"
-              onClick={handleFileButtonClick}
-              className="bg-secondary text-white px-6 py-3 rounded-[10px] font-semibold hover:opacity-90 transition-opacity"
-            >
-              파일선택
-            </button>
-
-            {/* 숨겨진 파일 입력 */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              className="hidden"
-              onChange={handleFileInputChange}
-              accept=".pdf,.doc,.docx,.hwp,.txt,.jpg,.jpeg,.png"
-            />
-          </div>
-
-          {/* 업로드된 파일 표시 */}
-          {uploadedFile && (
-            <div className="mt-4 p-4 bg-white rounded-[10px] border border-light-gray/60 shadow-sm flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-secondary/20 rounded flex items-center justify-center">
-                  <svg
-                    className="w-4 h-4 text-secondary"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <div className="font-medium text-black">
-                    {uploadedFile.name}
-                  </div>
-                  <div className="text-sm text-gray">
-                    {Math.round(uploadedFile.size / 1024)}KB
-                  </div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setUploadedFile(null)}
-                className="text-gray hover:text-red transition-colors"
-              >
-                삭제
-              </button>
-            </div>
-          )}
+            onFileButtonClick={handleFileButtonClick}
+            onFileInputChange={handleFileInputChange}
+            uploadedFile={uploadedFile}
+            onRemoveFile={handleRemoveFile}
+          />
 
           {/* 개인정보 동의 체크박스 */}
           <div className="mt-6">
@@ -416,51 +228,11 @@ export default function UploadPage() {
       </div>
 
       {/* 로딩 모달 */}
-      {isAnalyzing && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-white rounded-[20px] p-12 max-w-md w-full mx-4 text-center relative">
-            {/* 닫기 버튼 */}
-            <button
-              onClick={() => setIsAnalyzing(false)}
-              className="absolute top-4 right-4 text-gray hover:text-red transition-colors"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-            <div className="text-xl font-semibold text-secondary mb-6">
-              숨은 위험까지 찾아내는 든든한 계약 비서,
-            </div>
-            <div className="text-5xl font-extrabold text-secondary mb-8">
-              Checky
-            </div>
-            <div className="text-gray mb-8">
-              체키가 당신의 계약서를 분석 중입니다.
-            </div>
-            <div className="w-full bg-gray/20 rounded-full h-4 mb-2">
-              <div
-                className="bg-secondary h-4 rounded-full transition-all duration-300 ease-out"
-                style={{ width: `${loadingProgress}%` }}
-              ></div>
-            </div>
-            <div className="text-gray">
-              {loadingProgress < 100
-                ? `분석 중... ${loadingProgress}%`
-                : '분석 완료!'}
-            </div>
-          </div>
-        </div>
-      )}
+      <LoadingModal
+        isOpen={isAnalyzing}
+        progress={loadingProgress}
+        onClose={() => setIsAnalyzing(false)}
+      />
     </div>
   );
 }
