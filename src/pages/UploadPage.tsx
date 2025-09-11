@@ -3,27 +3,35 @@ import { useNavigate } from 'react-router-dom';
 
 // API 호출 함수들
 const API_BASE_URL = 'http://localhost:8000'; // FastAPI 서버 URL
-const USE_MOCK_DATA = true; // 백엔드 준비 전까지 Mock 데이터 사용
+const USE_MOCK_DATA = false; // 백엔드 연결 문제로 임시 Mock 데이터 사용
 
 // Mock 데이터 함수들
 const mockUploadFile = async (file: File) => {
   // 실제 API 호출을 시뮬레이션
   await new Promise(resolve => setTimeout(resolve, 1000));
-  return { task_id: `task_${Date.now()}` };
+  return {
+    success: true,
+    message: '파일이 성공적으로 업로드되었습니다.',
+    file_id: `file_${Date.now()}`,
+    file_name: file.name,
+    file_size: file.size,
+    file_type: file.type.split('/')[1],
+    extracted_text: `<<${file.name}>>\n\n- 이 파일은 Mock 데이터로 생성된 추출 텍스트입니다.\n- 실제 OCR 추출 결과를 시뮬레이션합니다.\n- 계약서 분석을 위한 텍스트 내용이 여기에 표시됩니다.`,
+  };
 };
 
-const mockCheckAnalysisStatus = async (taskId: string) => {
+const mockCheckAnalysisStatus = async (fileId: string) => {
   // 실제 API 호출을 시뮬레이션
   await new Promise(resolve => setTimeout(resolve, 500));
 
   // 랜덤하게 상태 반환 (테스트용)
   const random = Math.random();
   if (random < 0.3) {
-    return { status: 'processing' };
+    return 'processing';
   } else if (random < 0.9) {
-    return { status: 'completed' };
+    return 'completed';
   } else {
-    return { status: 'failed' };
+    return 'failed';
   }
 };
 
@@ -33,30 +41,88 @@ const uploadFile = async (file: File) => {
     return mockUploadFile(file);
   }
 
+  console.log('파일 업로드 시작:', file.name);
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await fetch(`${API_BASE_URL}/upload`, {
-    method: 'POST',
-    body: formData,
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/upload`, {
+      method: 'POST',
+      body: formData,
+    });
 
-  if (!response.ok) {
-    throw new Error('파일 업로드에 실패했습니다.');
+    console.log('업로드 응답 상태:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('업로드 실패:', response.status, errorText);
+      throw new Error(`파일 업로드에 실패했습니다. (${response.status})`);
+    }
+
+    const result = await response.json();
+    console.log('업로드 성공:', result);
+    return result;
+  } catch (error) {
+    console.error('업로드 에러:', error);
+    throw error;
   }
-
-  return response.json();
 };
 
-const checkAnalysisStatus = async (taskId: string) => {
+const checkAnalysisStatus = async (fileId: string) => {
   if (USE_MOCK_DATA) {
-    return mockCheckAnalysisStatus(taskId);
+    return mockCheckAnalysisStatus(fileId);
   }
 
-  const response = await fetch(`${API_BASE_URL}/analysis/status/${taskId}`);
+  console.log('상태 확인 시작:', fileId);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/upload/status/${fileId}`);
+    console.log('상태 확인 응답:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('상태 확인 실패:', response.status, errorText);
+      throw new Error(`분석 상태 확인에 실패했습니다. (${response.status})`);
+    }
+
+    const data = await response.json();
+    console.log('상태 확인 성공:', data);
+    return data.status; // 백엔드에서 JSON 객체의 status 필드 반환
+  } catch (error) {
+    console.error('상태 확인 에러:', error);
+    throw error;
+  }
+};
+
+const getAnalysisResult = async (fileId: string) => {
+  if (USE_MOCK_DATA) {
+    // Mock 데이터로 분석 결과 반환
+    return {
+      id: fileId,
+      title: '계약서 분석 결과',
+      articles: [
+        {
+          id: '1',
+          title: '계약서 조항 1',
+          sentences: [
+            {
+              id: '1-1',
+              text: '이 계약서는 안전합니다.',
+              risk: 'safe' as const,
+              why: '표준 계약 조건을 따르고 있습니다.',
+              fix: '추가 조치 불필요',
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  // 백엔드에서 분석 결과 API 호출
+  const response = await fetch(`${API_BASE_URL}/upload/analysis/${fileId}`);
 
   if (!response.ok) {
-    throw new Error('분석 상태 확인에 실패했습니다.');
+    throw new Error('분석 결과를 가져오는데 실패했습니다.');
   }
 
   return response.json();
@@ -69,8 +135,9 @@ export default function UploadPage() {
   const [isAgreed, setIsAgreed] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const [taskId, setTaskId] = useState<string | null>(null);
+  const [fileId, setFileId] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [pollingCount, setPollingCount] = useState(0);
 
   // 파일 선택 핸들러
   const handleFileSelect = (file: File) => {
@@ -131,29 +198,75 @@ export default function UploadPage() {
     try {
       setIsAnalyzing(true);
       setLoadingProgress(0);
+      setPollingCount(0); // 폴링 카운트 초기화
 
       // 1. 파일 업로드
       setLoadingProgress(20);
       const uploadResult = await uploadFile(uploadedFile);
-      setTaskId(uploadResult.task_id);
+      setFileId(uploadResult.file_id);
 
       // 2. 분석 상태 확인 (폴링)
       const checkStatus = async () => {
         try {
-          const statusResult = await checkAnalysisStatus(uploadResult.task_id);
+          setPollingCount(prev => prev + 1);
+          console.log(`폴링 횟수: ${pollingCount + 1}`);
 
-          if (statusResult.status === 'completed') {
+          // 최대 30번 폴링 (1분) 후 타임아웃
+          if (pollingCount >= 30) {
+            console.log('폴링 타임아웃 - 분석 완료로 처리');
             setLoadingProgress(100);
-            // 분석 완료 후 분석 페이지로 이동
+            const analysisResult = await getAnalysisResult(
+              uploadResult.file_id
+            );
             setTimeout(() => {
-              navigate('/analyze', { state: { taskId: uploadResult.task_id } });
+              navigate(`/analyze/${uploadResult.file_id}`, {
+                state: {
+                  analysisResult,
+                  extractedText: uploadResult.extracted_text,
+                  fileName: uploadResult.file_name,
+                },
+              });
             }, 1000);
-          } else if (statusResult.status === 'processing') {
+            return;
+          }
+
+          const statusResult = await checkAnalysisStatus(uploadResult.file_id);
+
+          if (statusResult === 'completed') {
+            setLoadingProgress(100);
+            // 분석 결과 가져오기
+            const analysisResult = await getAnalysisResult(
+              uploadResult.file_id
+            );
+            // 분석 완료 후 분석 페이지로 이동
+            console.log('분석 페이지로 전달할 데이터:', {
+              analysisResult,
+              extractedText: uploadResult.extracted_text,
+              fileName: uploadResult.file_name,
+            });
+            setTimeout(() => {
+              navigate(`/analyze/${uploadResult.file_id}`, {
+                state: {
+                  analysisResult,
+                  extractedText: uploadResult.extracted_text,
+                  fileName: uploadResult.file_name,
+                },
+              });
+            }, 1000);
+          } else if (statusResult === 'processing') {
             // 진행률 업데이트 (20% → 90%)
             setLoadingProgress(prev => Math.min(prev + 10, 90));
             setTimeout(checkStatus, 2000); // 2초마다 확인
-          } else if (statusResult.status === 'failed') {
+          } else if (statusResult === 'uploaded') {
+            // 파일 업로드 완료 - 분석 시작으로 처리
+            setLoadingProgress(40);
+            setTimeout(checkStatus, 2000); // 2초마다 확인
+          } else if (statusResult === 'failed') {
             throw new Error('분석에 실패했습니다.');
+          } else {
+            // 기타 상태 - 계속 확인
+            setLoadingProgress(prev => Math.min(prev + 5, 90));
+            setTimeout(checkStatus, 2000);
           }
         } catch (error) {
           console.error('분석 상태 확인 실패:', error);
@@ -185,8 +298,8 @@ export default function UploadPage() {
           {/* 파일 업로드 규칙 */}
           <div className="mb-6 space-y-2">
             <p className="text-sm text-gray">
-              • 압축 형식(zip) 파일을 제외한 모든 유형의 파일을 등록할 수
-              있습니다.
+              • 등록 가능한 파일 형식은 .pdf, .doc, .docx, .hwp, .txt, .jpg,
+              .jpeg, .png 입니다.
             </p>
             <p className="text-sm text-gray">
               • 파일은 한번에 하나만 업로드 할 수 있으며, 파일 1개 당 크기는
@@ -225,7 +338,7 @@ export default function UploadPage() {
               type="file"
               className="hidden"
               onChange={handleFileInputChange}
-              accept=".pdf,.doc,.docx,.hwp,.txt"
+              accept=".pdf,.doc,.docx,.hwp,.txt,.jpg,.jpeg,.png"
             />
           </div>
 
