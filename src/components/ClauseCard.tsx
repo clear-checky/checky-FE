@@ -21,13 +21,12 @@ export default function ClauseCard({ article }: { article: Article }) {
     <div className={`rounded-[10px] border ${wrapClasses} shadow-sm`}>
       {/* 🔹 제목은 항상 표시 */}
       <div className="w-full px-5 py-4">
-        <div className="flex items-center justify-between">
+        <div onClick={() => setOpen(v => !v)} className="flex items-center justify-between ">
           <h3 className="text-lg font-bold text-secondary">{article.title}</h3>
           {/* 🔹 토글 버튼은 프린트에서만 숨김 */}
           <button
             type="button"
             className="text-gray text-sm print:hidden"
-            onClick={() => setOpen(v => !v)}
           >
             {open ? "접기" : "자세히"}
           </button>

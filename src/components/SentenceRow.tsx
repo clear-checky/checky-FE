@@ -31,8 +31,9 @@ export default function SentenceRow({ sentence }: { sentence: Sentence }) {
       onClick={handleClick}
     >
       {/* 문장 본문 */}
-      <p className={`text-sm leading-6 ${textStyle}`}>{sentence.text}</p>
-
+      <p className={`text-sm leading-6 ${textStyle} transition-transform duration-200 hover:scale-101 origin-center`}>
+  {sentence.text}
+</p>
       {/* 상세 사유/수정안 — 프린트엔 무조건 표시 */}
       <div
         className={`${detailVisibility} mt-2 rounded-[10px] ${borderStyle} bg-white/50 p-4 text-sm space-y-2 border`}
