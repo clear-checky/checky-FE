@@ -12,14 +12,17 @@ export default function HomePage() {
             <div className="flex items-center mt-4">
             <button
               onClick={() => navigate('/upload')}
-              className="bg-secondary text-white px-6 py-2 rounded-[10px] font-bold cursor-pointer"
+              className="bg-secondary text-white px-6 py-2 rounded-[10px] font-bold cursor-pointer mt-[30px] mb-[180px]"
             >
               분석하러 가기
             </button>
           </div>
-         <h1 className="font-medium text-xl text-[#707070] mt-120 whitespace-pre-line text-center">
+            <img src="src/assets/user.svg" 
+                className="w-300 h-auto" />
+
+         <h1 className="font-medium text-xl text-[#707070] mt-50 whitespace-pre-line text-center">
           {`어렵고 복잡한 법률 용어,\n왠지 모르게 불안한 계약서,`}</h1>
-         <h1 className="font-black text-2xl text-[#121212] mt-6 whitespace-pre-line text-center">
+         <h1 className="font-black text-2xl text-[#121212] mb-[150px] whitespace-pre-line text-center">
           AI 개인 법률 리스크 관리 서비스 Checky로 해결.</h1>
         <div className="mt-[50px] w-full flex items-center">
           <div className="basis-1/2 flex flex-col items-start space-y-2 pl-[180px]">
@@ -81,7 +84,27 @@ export default function HomePage() {
           </div>
         </div>
 
-
+        <div className="mt-[80px] w-full flex items-center flex-row-reverse">
+          <div className="basis-1/2 flex flex-col justify-center items-center space-y-2 pr-32 text-center">
+            <div className="font-bold text-4xl text-[#FFFFFF] mt-[150px] mb-3 whitespace-pre-line">
+          {'안심되는 계약성 작성,\n체키와 지금 시작해보세요'}</div>
+          <h1 className="text-md text-[#FFFFFF] leading-relaxed break-keep whitespace-pre-line">
+          {'개인정보 보호를 위해 모든 정보는 24시간 내 영구 삭제됩니다.'}</h1>
+                      <button
+              onClick={() => navigate('/upload')}
+              className="bg-[#000000] text-white px-6 py-2 rounded-[10px] font-bold cursor-pointer mt-[30px] mb-[180px]"
+            >
+              분석하러 가기
+            </button>
+          </div>
+          <div className="basis-1/2 flex justify-start pl-35">
+            <img
+              src="src/assets/MacBook.svg"
+              className="w-[360px] sm:w-[640px] md:w-[840px] lg:w-[1040px] h-auto mt-20"
+              alt="report"
+            />
+          </div>
+        </div>
 
          
       </div>
