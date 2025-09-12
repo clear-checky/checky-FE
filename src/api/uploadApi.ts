@@ -2,6 +2,31 @@
 const API_BASE_URL = 'http://localhost:8000'; // FastAPI 서버 URL
 const USE_MOCK_DATA = false; // 백엔드 연결 문제로 임시 Mock 데이터 사용
 
+// 문장 파싱 함수
+const parseTextToSentences = (text: string) => {
+  // 텍스트 전처리
+  const cleanedText = text
+    .replace(/\s+/g, ' ') // 여러 공백을 하나로
+    .replace(/\n+/g, ' ') // 줄바꿈을 공백으로
+    .trim();
+
+  // 문장 단위로 분리 (마침표, 느낌표, 물음표 기준)
+  const sentences = cleanedText
+    .split(/[.!?]+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 10) // 너무 짧은 문장 제거
+    .map((sentence, index) => ({
+      id: `sentence-${index + 1}`,
+      text: sentence,
+      risk: 'safe' as const, // 임시값, 백엔드에서 분석 후 업데이트
+      why: '',
+      fix: '',
+    }));
+
+  console.log(`총 ${sentences.length}개의 문장으로 파싱됨`);
+  return sentences;
+};
+
 // Mock 데이터 함수들
 const mockUploadFile = async (file: File) => {
   // 실제 API 호출을 시뮬레이션
@@ -123,4 +148,37 @@ export const getAnalysisResult = async (taskId: string) => {
   }
 
   return response.json();
+};
+
+// 문장 파싱 함수 export
+export { parseTextToSentences };
+
+// 문장별 분석 함수 (백엔드 API 호출)
+export const analyzeSentences = async (sentences: any[]) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/contract/analyze`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        articles: [
+          {
+            id: 1,
+            title: '계약서',
+            sentences: sentences,
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('문장 분석에 실패했습니다.');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('문장 분석 에러:', error);
+    throw error;
+  }
 };

@@ -4,6 +4,8 @@ import {
   uploadFile,
   checkAnalysisStatus,
   getAnalysisResult,
+  parseTextToSentences,
+  analyzeSentences,
 } from '../api/uploadApi';
 import FileUploadArea from '../components/FileUploadArea';
 import LoadingModal from '../components/LoadingModal';
@@ -99,15 +101,24 @@ export default function UploadPage() {
           if (pollingCount >= 30) {
             console.log('폴링 타임아웃 - 분석 완료로 처리');
             setLoadingProgress(100);
-            const analysisResult = await getAnalysisResult(
-              uploadResult.task_id
+
+            // 추출된 텍스트를 문장별로 파싱
+            const parsedSentences = parseTextToSentences(
+              uploadResult.extracted_text
             );
+            console.log('파싱된 문장들:', parsedSentences);
+
+            // 문장별 분석 수행
+            const analysisResult = await analyzeSentences(parsedSentences);
+            console.log('문장별 분석 결과:', analysisResult);
+
             setTimeout(() => {
               navigate(`/analyze/${uploadResult.task_id}`, {
                 state: {
                   analysisResult,
                   extractedText: uploadResult.extracted_text,
                   fileName: uploadResult.file_name,
+                  parsedSentences,
                 },
               });
             }, 1000);
@@ -118,15 +129,23 @@ export default function UploadPage() {
 
           if (statusResult === 'completed') {
             setLoadingProgress(100);
-            // 분석 결과 가져오기
-            const analysisResult = await getAnalysisResult(
-              uploadResult.task_id
+
+            // 추출된 텍스트를 문장별로 파싱
+            const parsedSentences = parseTextToSentences(
+              uploadResult.extracted_text
             );
+            console.log('파싱된 문장들:', parsedSentences);
+
+            // 문장별 분석 수행
+            const analysisResult = await analyzeSentences(parsedSentences);
+            console.log('문장별 분석 결과:', analysisResult);
+
             // 분석 완료 후 분석 페이지로 이동
             console.log('분석 페이지로 전달할 데이터:', {
               analysisResult,
               extractedText: uploadResult.extracted_text,
               fileName: uploadResult.file_name,
+              parsedSentences,
             });
             setTimeout(() => {
               navigate(`/analyze/${uploadResult.task_id}`, {
@@ -134,6 +153,7 @@ export default function UploadPage() {
                   analysisResult,
                   extractedText: uploadResult.extracted_text,
                   fileName: uploadResult.file_name,
+                  parsedSentences,
                 },
               });
             }, 1000);
