@@ -297,6 +297,7 @@ export default function UploadPage() {
             uploadedFile={uploadedFile}
             onRemoveFile={handleRemoveFile}
             fileInputRef={fileInputRef}
+            isUploading={isAnalyzing && loadingStage === 'uploading'}
           />
 
           {/* 개인정보 동의 체크박스 */}
