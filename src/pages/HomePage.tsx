@@ -87,7 +87,7 @@ export default function HomePage() {
         <div className="mt-[80px] w-full flex items-center flex-row-reverse">
           <div className="basis-1/2 flex flex-col justify-center items-center space-y-2 pr-32 text-center">
             <div className="font-bold text-4xl text-[#FFFFFF] mt-[150px] mb-3 whitespace-pre-line">
-          {'안심되는 계약성 작성,\n체키와 지금 시작해보세요'}</div>
+          {'안심되는 계약서 작성,\n체키와 지금 시작해보세요'}</div>
           <h1 className="text-md text-[#FFFFFF] leading-relaxed break-keep whitespace-pre-line">
           {'개인정보 보호를 위해 모든 정보는 24시간 내 영구 삭제됩니다.'}</h1>
                       <button
