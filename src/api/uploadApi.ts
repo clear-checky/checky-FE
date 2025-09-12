@@ -2,8 +2,8 @@
 const API_BASE_URL = 'http://localhost:8000'; // FastAPI 서버 URL
 const USE_MOCK_DATA = false; // 백엔드 연결 문제로 임시 Mock 데이터 사용
 
-// 문장 파싱 함수
-const parseTextToSentences = (text: string) => {
+// 계약서를 문장별로 파싱하여 articles 형태로 변환
+const parseContractToArticles = (text: string) => {
   // 텍스트 전처리
   const cleanedText = text
     .replace(/\s+/g, ' ') // 여러 공백을 하나로
@@ -24,7 +24,15 @@ const parseTextToSentences = (text: string) => {
     }));
 
   console.log(`총 ${sentences.length}개의 문장으로 파싱됨`);
-  return sentences;
+
+  // articles 형태로 반환
+  return [
+    {
+      id: 1,
+      title: '계약서',
+      sentences: sentences,
+    },
+  ];
 };
 
 // Mock 데이터 함수들
@@ -150,8 +158,8 @@ export const getAnalysisResult = async (taskId: string) => {
   return response.json();
 };
 
-// 문장 파싱 함수 export
-export { parseTextToSentences };
+// 계약서 파싱 함수 export
+export { parseContractToArticles };
 
 // 문장별 분석 함수 (백엔드 API 호출)
 export const analyzeSentences = async (sentences: any[]) => {

@@ -4,7 +4,7 @@ import {
   uploadFile,
   checkAnalysisStatus,
   getAnalysisResult,
-  parseTextToSentences,
+  parseContractToArticles,
   analyzeSentences,
 } from '../api/uploadApi';
 import FileUploadArea from '../components/FileUploadArea';
@@ -102,14 +102,16 @@ export default function UploadPage() {
             console.log('폴링 타임아웃 - 분석 완료로 처리');
             setLoadingProgress(100);
 
-            // 추출된 텍스트를 문장별로 파싱
-            const parsedSentences = parseTextToSentences(
+            // 추출된 텍스트를 문장별로 파싱하여 articles 형태로 변환
+            const parsedArticles = parseContractToArticles(
               uploadResult.extracted_text
             );
-            console.log('파싱된 문장들:', parsedSentences);
+            console.log('파싱된 articles:', parsedArticles);
 
-            // 문장별 분석 수행
-            const analysisResult = await analyzeSentences(parsedSentences);
+            // AI 분석 수행
+            const analysisResult = await analyzeSentences(
+              parsedArticles[0].sentences
+            );
             console.log('문장별 분석 결과:', analysisResult);
 
             setTimeout(() => {
@@ -118,7 +120,7 @@ export default function UploadPage() {
                   analysisResult,
                   extractedText: uploadResult.extracted_text,
                   fileName: uploadResult.file_name,
-                  parsedSentences,
+                  parsedArticles,
                 },
               });
             }, 1000);
@@ -130,14 +132,16 @@ export default function UploadPage() {
           if (statusResult === 'completed') {
             setLoadingProgress(100);
 
-            // 추출된 텍스트를 문장별로 파싱
-            const parsedSentences = parseTextToSentences(
+            // 추출된 텍스트를 문장별로 파싱하여 articles 형태로 변환
+            const parsedArticles = parseContractToArticles(
               uploadResult.extracted_text
             );
-            console.log('파싱된 문장들:', parsedSentences);
+            console.log('파싱된 articles:', parsedArticles);
 
-            // 문장별 분석 수행
-            const analysisResult = await analyzeSentences(parsedSentences);
+            // AI 분석 수행
+            const analysisResult = await analyzeSentences(
+              parsedArticles[0].sentences
+            );
             console.log('문장별 분석 결과:', analysisResult);
 
             // 분석 완료 후 분석 페이지로 이동
@@ -153,7 +157,7 @@ export default function UploadPage() {
                   analysisResult,
                   extractedText: uploadResult.extracted_text,
                   fileName: uploadResult.file_name,
-                  parsedSentences,
+                  parsedArticles,
                 },
               });
             }, 1000);
