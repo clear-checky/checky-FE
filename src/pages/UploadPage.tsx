@@ -99,10 +99,10 @@ export default function UploadPage() {
             console.log('폴링 타임아웃 - 분석 완료로 처리');
             setLoadingProgress(100);
             const analysisResult = await getAnalysisResult(
-              uploadResult.file_id
+              uploadResult.task_id
             );
             setTimeout(() => {
-              navigate(`/analyze/${uploadResult.file_id}`, {
+              navigate(`/analyze/${uploadResult.task_id}`, {
                 state: {
                   analysisResult,
                   extractedText: uploadResult.extracted_text,
@@ -113,13 +113,13 @@ export default function UploadPage() {
             return;
           }
 
-          const statusResult = await checkAnalysisStatus(uploadResult.file_id);
+          const statusResult = await checkAnalysisStatus(uploadResult.task_id);
 
           if (statusResult === 'completed') {
             setLoadingProgress(100);
             // 분석 결과 가져오기
             const analysisResult = await getAnalysisResult(
-              uploadResult.file_id
+              uploadResult.task_id
             );
             // 분석 완료 후 분석 페이지로 이동
             console.log('분석 페이지로 전달할 데이터:', {
@@ -128,7 +128,7 @@ export default function UploadPage() {
               fileName: uploadResult.file_name,
             });
             setTimeout(() => {
-              navigate(`/analyze/${uploadResult.file_id}`, {
+              navigate(`/analyze/${uploadResult.task_id}`, {
                 state: {
                   analysisResult,
                   extractedText: uploadResult.extracted_text,
