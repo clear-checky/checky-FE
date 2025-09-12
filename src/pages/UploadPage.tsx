@@ -149,7 +149,7 @@ export default function UploadPage() {
               analysisResult,
               extractedText: uploadResult.extracted_text,
               fileName: uploadResult.file_name,
-              parsedSentences,
+              parsedArticles,
             });
             setTimeout(() => {
               navigate(`/analyze/${uploadResult.task_id}`, {
