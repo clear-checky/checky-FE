@@ -267,14 +267,24 @@ export default function UploadPage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-5xl px-6 py-10">
-        {/* 페이지 제목 */}
-        <h1 className="text-3xl font-extrabold text-black mb-6">업로드 화면</h1>
-
         {/* 업로드 카드 */}
         <div className="bg-white rounded-[10px] border border-light-gray/60 shadow-sm p-8">
-          <h2 className="text-2xl font-bold text-secondary mb-6">
-            계약서 분석하기
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-secondary">
+              계약서 분석하기
+            </h2>
+            <button
+              onClick={() => {
+                const link = document.createElement('a');
+                link.href = '/samples/근로계약서.pdf';
+                link.download = '근로계약서.pdf';
+                link.click();
+              }}
+              className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 cursor-pointer border border-gray-300"
+            >
+              📁 테스트 파일
+            </button>
+          </div>
 
           {/* 파일 업로드 영역 */}
           <FileUploadArea
@@ -287,6 +297,7 @@ export default function UploadPage() {
             uploadedFile={uploadedFile}
             onRemoveFile={handleRemoveFile}
             fileInputRef={fileInputRef}
+            isUploading={isAnalyzing && loadingStage === 'uploading'}
           />
 
           {/* 개인정보 동의 체크박스 */}
@@ -296,7 +307,7 @@ export default function UploadPage() {
                 type="checkbox"
                 checked={isAgreed}
                 onChange={e => setIsAgreed(e.target.checked)}
-                className="w-4 h-4 text-secondary border-gray-300 rounded focus:ring-secondary accent-secondary flex-shrink-0 mt-0.5"
+                className="w-4 h-4 text-secondary border-gray-300 rounded focus:ring-secondary accent-secondary flex-shrink-0 mt-0.5 cursor-pointer"
               />
               <span className="text-sm text-gray leading-relaxed">
                 AI가 계약서를 분석하는 과정에서 성명, 연락처 등 일부 개인정보가
@@ -316,7 +327,7 @@ export default function UploadPage() {
               disabled={!uploadedFile || !isAgreed}
               className={`px-8 py-3 rounded-[10px] font-bold transition-opacity ${
                 uploadedFile && isAgreed
-                  ? 'bg-secondary text-white hover:opacity-90'
+                  ? 'bg-secondary text-white hover:opacity-90 cursor-pointer'
                   : 'bg-gray/30 text-gray cursor-not-allowed'
               }`}
             >
