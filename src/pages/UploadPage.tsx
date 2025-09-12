@@ -267,14 +267,24 @@ export default function UploadPage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-5xl px-6 py-10">
-        {/* 페이지 제목 */}
-        <h1 className="text-3xl font-extrabold text-black mb-6">업로드 화면</h1>
-
         {/* 업로드 카드 */}
         <div className="bg-white rounded-[10px] border border-light-gray/60 shadow-sm p-8">
-          <h2 className="text-2xl font-bold text-secondary mb-6">
-            계약서 분석하기
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-secondary">
+              계약서 분석하기
+            </h2>
+            <button
+              onClick={() => {
+                const link = document.createElement('a');
+                link.href = '/samples/근로계약서.pdf';
+                link.download = '근로계약서.pdf';
+                link.click();
+              }}
+              className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 cursor-pointer border border-gray-300"
+            >
+              📁 테스트 파일
+            </button>
+          </div>
 
           {/* 파일 업로드 영역 */}
           <FileUploadArea
