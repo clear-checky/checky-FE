@@ -8,11 +8,11 @@ export default function HomePage() {
       <div className="flex flex-col justify-center items-center mt-40"> 
             <img src="src/assets/Checky.svg" 
                 className="w-200 h-auto" />
-            <h1 className="font-bold text-xl text-secondary mt-8">지금 바로 사용해보세요!</h1>
+            <h1 className="font-bold text-xl text-secondary mt-20">지금 바로 사용해보세요!</h1>
             <div className="flex items-center mt-4">
             <button
               onClick={() => navigate('/upload')}
-              className="bg-secondary text-white px-6 py-2 rounded-[10px] font-bold cursor-pointer mt-[30px] mb-[180px]"
+              className="bg-secondary text-white px-6 py-2 rounded-[10px] font-bold cursor-pointer mt-4 mb-[120px]"
             >
               분석하러 가기
             </button>
@@ -22,7 +22,7 @@ export default function HomePage() {
 
          <h1 className="font-medium text-xl text-[#707070] mt-50 whitespace-pre-line text-center">
           {`어렵고 복잡한 법률 용어,\n왠지 모르게 불안한 계약서,`}</h1>
-         <h1 className="font-black text-2xl text-[#121212] mb-[150px] whitespace-pre-line text-center">
+         <h1 className="font-black text-3xl text-[#121212] mb-[150px] whitespace-pre-line text-center mt-20">
           AI 개인 법률 리스크 관리 서비스 Checky로 해결.</h1>
         <div className="mt-[50px] w-full flex items-center">
           <div className="basis-1/2 flex flex-col items-start space-y-2 pl-[180px]">
