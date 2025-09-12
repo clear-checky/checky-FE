@@ -6,6 +6,7 @@ import {
   getAnalysisResult,
   parseContractToArticles,
   analyzeSentences,
+  saveAnalysisResult,
 } from '../api/uploadApi';
 import FileUploadArea from '../components/FileUploadArea';
 import LoadingModal from '../components/LoadingModal';
@@ -120,11 +121,35 @@ export default function UploadPage() {
             setLoadingStage('analyzing');
             setLoadingProgress(70);
 
-            // AI 분석 수행
-            const analysisResult = await analyzeSentences(
-              parsedArticles[0].sentences
-            );
+            // AI 분석 수행 - 단순한 문장 배열로 전송
+            const analysisResult = await analyzeSentences(parsedArticles);
             console.log('문장별 분석 결과:', analysisResult);
+
+            // 백엔드에서 받은 분석 결과로 문장들의 risk 값 업데이트
+            if (
+              analysisResult &&
+              analysisResult.articles &&
+              analysisResult.articles.length > 0
+            ) {
+              // 백엔드에서 조항별로 그룹화된 결과를 그대로 사용
+              const updatedArticles = analysisResult.articles;
+              parsedArticles.splice(
+                0,
+                parsedArticles.length,
+                ...updatedArticles
+              );
+            }
+
+            // 분석 결과를 백엔드에 저장 (임시 비활성화)
+            // try {
+            //   await saveAnalysisResult(uploadResult.task_id, {
+            //     articles: parsedArticles,
+            //     analysisResult: analysisResult,
+            //   });
+            //   console.log('분석 결과 저장 완료');
+            // } catch (error) {
+            //   console.error('분석 결과 저장 실패:', error);
+            // }
 
             setTimeout(() => {
               navigate(`/analyze/${uploadResult.task_id}`, {
@@ -158,11 +183,35 @@ export default function UploadPage() {
             setLoadingStage('analyzing');
             setLoadingProgress(70);
 
-            // AI 분석 수행
-            const analysisResult = await analyzeSentences(
-              parsedArticles[0].sentences
-            );
+            // AI 분석 수행 - 단순한 문장 배열로 전송
+            const analysisResult = await analyzeSentences(parsedArticles);
             console.log('문장별 분석 결과:', analysisResult);
+
+            // 백엔드에서 받은 분석 결과로 문장들의 risk 값 업데이트
+            if (
+              analysisResult &&
+              analysisResult.articles &&
+              analysisResult.articles.length > 0
+            ) {
+              // 백엔드에서 조항별로 그룹화된 결과를 그대로 사용
+              const updatedArticles = analysisResult.articles;
+              parsedArticles.splice(
+                0,
+                parsedArticles.length,
+                ...updatedArticles
+              );
+            }
+
+            // 분석 결과를 백엔드에 저장 (임시 비활성화)
+            // try {
+            //   await saveAnalysisResult(uploadResult.task_id, {
+            //     articles: parsedArticles,
+            //     analysisResult: analysisResult,
+            //   });
+            //   console.log('분석 결과 저장 완료');
+            // } catch (error) {
+            //   console.error('분석 결과 저장 실패:', error);
+            // }
 
             // 분석 완료 단계
             setLoadingStage('completed');

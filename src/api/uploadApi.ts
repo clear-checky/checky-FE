@@ -25,14 +25,8 @@ const parseContractToArticles = (text: string) => {
 
   console.log(`총 ${sentences.length}개의 문장으로 파싱됨`);
 
-  // articles 형태로 반환
-  return [
-    {
-      id: 1,
-      title: '계약서',
-      sentences: sentences,
-    },
-  ];
+  // 단순하게 문장 배열만 반환 (백엔드에서 조항별 그룹화 처리)
+  return sentences;
 };
 
 // Mock 데이터 함수들
@@ -164,6 +158,8 @@ export { parseContractToArticles };
 // 문장별 분석 함수 (백엔드 API 호출)
 export const analyzeSentences = async (sentences: any[]) => {
   try {
+    console.log('AI 분석 요청 데이터:', sentences);
+
     const response = await fetch(`${API_BASE_URL}/contract/analyze`, {
       method: 'POST',
       headers: {
@@ -174,19 +170,51 @@ export const analyzeSentences = async (sentences: any[]) => {
           {
             id: 1,
             title: '계약서',
-            sentences: sentences,
+            sentences: sentences, // 단순한 문장 배열을 articles 안에 넣어서 전송
           },
         ],
       }),
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('AI 분석 실패:', response.status, errorText);
       throw new Error('문장 분석에 실패했습니다.');
+    }
+
+    const result = await response.json();
+    console.log('AI 분석 결과:', result);
+    return result;
+  } catch (error) {
+    console.error('문장 분석 에러:', error);
+    throw error;
+  }
+};
+
+// AI 분석 결과를 백엔드에 저장
+export const saveAnalysisResult = async (
+  taskId: string,
+  analysisResult: any
+) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/upload/save-analysis`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        task_id: taskId,
+        analysis_result: analysisResult,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('분석 결과 저장에 실패했습니다.');
     }
 
     return await response.json();
   } catch (error) {
-    console.error('문장 분석 에러:', error);
+    console.error('분석 결과 저장 에러:', error);
     throw error;
   }
 };
