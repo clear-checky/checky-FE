@@ -17,6 +17,9 @@ export default function UploadPage() {
   const [isAgreed, setIsAgreed] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingStage, setLoadingStage] = useState<
+    'uploading' | 'parsing' | 'analyzing' | 'completed'
+  >('uploading');
   const [isDragOver, setIsDragOver] = useState(false);
   const [pollingCount, setPollingCount] = useState(0);
 
@@ -83,6 +86,7 @@ export default function UploadPage() {
 
     try {
       setIsAnalyzing(true);
+      setLoadingStage('uploading');
       setLoadingProgress(0);
       setPollingCount(0); // 폴링 카운트 초기화
 
@@ -102,11 +106,19 @@ export default function UploadPage() {
             console.log('폴링 타임아웃 - 분석 완료로 처리');
             setLoadingProgress(100);
 
+            // 텍스트 파싱 단계
+            setLoadingStage('parsing');
+            setLoadingProgress(50);
+
             // 추출된 텍스트를 문장별로 파싱하여 articles 형태로 변환
             const parsedArticles = parseContractToArticles(
               uploadResult.extracted_text
             );
             console.log('파싱된 articles:', parsedArticles);
+
+            // AI 분석 단계
+            setLoadingStage('analyzing');
+            setLoadingProgress(70);
 
             // AI 분석 수행
             const analysisResult = await analyzeSentences(
@@ -132,17 +144,29 @@ export default function UploadPage() {
           if (statusResult === 'completed') {
             setLoadingProgress(100);
 
+            // 텍스트 파싱 단계
+            setLoadingStage('parsing');
+            setLoadingProgress(50);
+
             // 추출된 텍스트를 문장별로 파싱하여 articles 형태로 변환
             const parsedArticles = parseContractToArticles(
               uploadResult.extracted_text
             );
             console.log('파싱된 articles:', parsedArticles);
 
+            // AI 분석 단계
+            setLoadingStage('analyzing');
+            setLoadingProgress(70);
+
             // AI 분석 수행
             const analysisResult = await analyzeSentences(
               parsedArticles[0].sentences
             );
             console.log('문장별 분석 결과:', analysisResult);
+
+            // 분석 완료 단계
+            setLoadingStage('completed');
+            setLoadingProgress(100);
 
             // 분석 완료 후 분석 페이지로 이동
             console.log('분석 페이지로 전달할 데이터:', {
@@ -257,6 +281,7 @@ export default function UploadPage() {
       <LoadingModal
         isOpen={isAnalyzing}
         progress={loadingProgress}
+        stage={loadingStage}
         onClose={() => setIsAnalyzing(false)}
       />
     </div>
