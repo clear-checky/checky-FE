@@ -87,6 +87,7 @@ export default function UploadPage() {
       // 1. 파일 업로드
       setLoadingProgress(20);
       const uploadResult = await uploadFile(uploadedFile);
+      console.log('업로드 결과:', uploadResult);
 
       // 2. 분석 상태 확인 (폴링)
       const checkStatus = async () => {
