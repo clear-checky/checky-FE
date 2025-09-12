@@ -4,6 +4,9 @@ import {
   uploadFile,
   checkAnalysisStatus,
   getAnalysisResult,
+  parseContractToArticles,
+  analyzeSentences,
+  saveAnalysisResult,
 } from '../api/uploadApi';
 import FileUploadArea from '../components/FileUploadArea';
 import LoadingModal from '../components/LoadingModal';
@@ -15,6 +18,9 @@ export default function UploadPage() {
   const [isAgreed, setIsAgreed] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingStage, setLoadingStage] = useState<
+    'uploading' | 'parsing' | 'analyzing' | 'completed'
+  >('uploading');
   const [isDragOver, setIsDragOver] = useState(false);
   const [pollingCount, setPollingCount] = useState(0);
 
@@ -81,12 +87,14 @@ export default function UploadPage() {
 
     try {
       setIsAnalyzing(true);
+      setLoadingStage('uploading');
       setLoadingProgress(0);
       setPollingCount(0); // 폴링 카운트 초기화
 
       // 1. 파일 업로드
       setLoadingProgress(20);
       const uploadResult = await uploadFile(uploadedFile);
+      console.log('업로드 결과:', uploadResult);
 
       // 2. 분석 상태 확인 (폴링)
       const checkStatus = async () => {
@@ -98,15 +106,58 @@ export default function UploadPage() {
           if (pollingCount >= 30) {
             console.log('폴링 타임아웃 - 분석 완료로 처리');
             setLoadingProgress(100);
-            const analysisResult = await getAnalysisResult(
-              uploadResult.task_id
+
+            // 텍스트 파싱 단계
+            setLoadingStage('parsing');
+            setLoadingProgress(50);
+
+            // 추출된 텍스트를 문장별로 파싱하여 articles 형태로 변환
+            const parsedArticles = parseContractToArticles(
+              uploadResult.extracted_text
             );
+            console.log('파싱된 articles:', parsedArticles);
+
+            // AI 분석 단계
+            setLoadingStage('analyzing');
+            setLoadingProgress(70);
+
+            // AI 분석 수행 - 단순한 문장 배열로 전송
+            const analysisResult = await analyzeSentences(parsedArticles);
+            console.log('문장별 분석 결과:', analysisResult);
+
+            // 백엔드에서 받은 분석 결과로 문장들의 risk 값 업데이트
+            if (
+              analysisResult &&
+              analysisResult.articles &&
+              analysisResult.articles.length > 0
+            ) {
+              // 백엔드에서 조항별로 그룹화된 결과를 그대로 사용
+              const updatedArticles = analysisResult.articles;
+              parsedArticles.splice(
+                0,
+                parsedArticles.length,
+                ...updatedArticles
+              );
+            }
+
+            // 분석 결과를 백엔드에 저장 (임시 비활성화)
+            // try {
+            //   await saveAnalysisResult(uploadResult.task_id, {
+            //     articles: parsedArticles,
+            //     analysisResult: analysisResult,
+            //   });
+            //   console.log('분석 결과 저장 완료');
+            // } catch (error) {
+            //   console.error('분석 결과 저장 실패:', error);
+            // }
+
             setTimeout(() => {
               navigate(`/analyze/${uploadResult.task_id}`, {
                 state: {
                   analysisResult,
                   extractedText: uploadResult.extracted_text,
                   fileName: uploadResult.file_name,
+                  parsedArticles,
                 },
               });
             }, 1000);
@@ -117,15 +168,61 @@ export default function UploadPage() {
 
           if (statusResult === 'completed') {
             setLoadingProgress(100);
-            // 분석 결과 가져오기
-            const analysisResult = await getAnalysisResult(
-              uploadResult.task_id
+
+            // 텍스트 파싱 단계
+            setLoadingStage('parsing');
+            setLoadingProgress(50);
+
+            // 추출된 텍스트를 문장별로 파싱하여 articles 형태로 변환
+            const parsedArticles = parseContractToArticles(
+              uploadResult.extracted_text
             );
+            console.log('파싱된 articles:', parsedArticles);
+
+            // AI 분석 단계
+            setLoadingStage('analyzing');
+            setLoadingProgress(70);
+
+            // AI 분석 수행 - 단순한 문장 배열로 전송
+            const analysisResult = await analyzeSentences(parsedArticles);
+            console.log('문장별 분석 결과:', analysisResult);
+
+            // 백엔드에서 받은 분석 결과로 문장들의 risk 값 업데이트
+            if (
+              analysisResult &&
+              analysisResult.articles &&
+              analysisResult.articles.length > 0
+            ) {
+              // 백엔드에서 조항별로 그룹화된 결과를 그대로 사용
+              const updatedArticles = analysisResult.articles;
+              parsedArticles.splice(
+                0,
+                parsedArticles.length,
+                ...updatedArticles
+              );
+            }
+
+            // 분석 결과를 백엔드에 저장 (임시 비활성화)
+            // try {
+            //   await saveAnalysisResult(uploadResult.task_id, {
+            //     articles: parsedArticles,
+            //     analysisResult: analysisResult,
+            //   });
+            //   console.log('분석 결과 저장 완료');
+            // } catch (error) {
+            //   console.error('분석 결과 저장 실패:', error);
+            // }
+
+            // 분석 완료 단계
+            setLoadingStage('completed');
+            setLoadingProgress(100);
+
             // 분석 완료 후 분석 페이지로 이동
             console.log('분석 페이지로 전달할 데이터:', {
               analysisResult,
               extractedText: uploadResult.extracted_text,
               fileName: uploadResult.file_name,
+              parsedArticles,
             });
             setTimeout(() => {
               navigate(`/analyze/${uploadResult.task_id}`, {
@@ -133,6 +230,7 @@ export default function UploadPage() {
                   analysisResult,
                   extractedText: uploadResult.extracted_text,
                   fileName: uploadResult.file_name,
+                  parsedArticles,
                 },
               });
             }, 1000);
@@ -232,6 +330,7 @@ export default function UploadPage() {
       <LoadingModal
         isOpen={isAnalyzing}
         progress={loadingProgress}
+        stage={loadingStage}
         onClose={() => setIsAnalyzing(false)}
       />
     </div>
