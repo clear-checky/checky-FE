@@ -9,7 +9,7 @@ const mockUploadFile = async (file: File) => {
   return {
     success: true,
     message: '파일이 성공적으로 업로드되었습니다.',
-    file_id: `file_${Date.now()}`,
+    task_id: `file_${Date.now()}`,
     file_name: file.name,
     file_size: file.size,
     file_type: file.type.split('/')[1],
@@ -17,7 +17,7 @@ const mockUploadFile = async (file: File) => {
   };
 };
 
-const mockCheckAnalysisStatus = async (fileId: string) => {
+const mockCheckAnalysisStatus = async (taskId: string) => {
   // 실제 API 호출을 시뮬레이션
   await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -65,15 +65,15 @@ export const uploadFile = async (file: File) => {
   }
 };
 
-export const checkAnalysisStatus = async (fileId: string) => {
+export const checkAnalysisStatus = async (taskId: string) => {
   if (USE_MOCK_DATA) {
-    return mockCheckAnalysisStatus(fileId);
+    return mockCheckAnalysisStatus(taskId);
   }
 
-  console.log('상태 확인 시작:', fileId);
+  console.log('상태 확인 시작:', taskId);
 
   try {
-    const response = await fetch(`${API_BASE_URL}/upload/status/${fileId}`);
+    const response = await fetch(`${API_BASE_URL}/upload/status/${taskId}`);
     console.log('상태 확인 응답:', response.status);
 
     if (!response.ok) {
@@ -91,11 +91,11 @@ export const checkAnalysisStatus = async (fileId: string) => {
   }
 };
 
-export const getAnalysisResult = async (fileId: string) => {
+export const getAnalysisResult = async (taskId: string) => {
   if (USE_MOCK_DATA) {
     // Mock 데이터로 분석 결과 반환
     return {
-      id: fileId,
+      id: taskId,
       title: '계약서 분석 결과',
       articles: [
         {
@@ -116,7 +116,7 @@ export const getAnalysisResult = async (fileId: string) => {
   }
 
   // 백엔드에서 분석 결과 API 호출
-  const response = await fetch(`${API_BASE_URL}/upload/analysis/${fileId}`);
+  const response = await fetch(`${API_BASE_URL}/upload/analysis/${taskId}`);
 
   if (!response.ok) {
     throw new Error('분석 결과를 가져오는데 실패했습니다.');
