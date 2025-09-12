@@ -57,7 +57,7 @@ export default function FileUploadArea({
         <button
           type="button"
           onClick={onFileButtonClick}
-          className="bg-secondary text-white px-6 py-3 rounded-[10px] font-semibold hover:opacity-90 transition-opacity"
+          className="bg-secondary text-white px-6 py-3 rounded-[10px] font-semibold hover:opacity-90 transition-opacity cursor-pointer"
         >
           파일선택
         </button>
@@ -96,13 +96,15 @@ export default function FileUploadArea({
               </div>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onRemoveFile}
-            className="text-gray hover:text-red transition-colors"
-          >
-            삭제
-          </button>
+          <div className="flex items-center mr-2">
+            <button
+              type="button"
+              onClick={onRemoveFile}
+              className="text-base text-gray hover:text-red transition-colors cursor-pointer"
+            >
+              삭제
+            </button>
+          </div>
         </div>
       )}
     </div>

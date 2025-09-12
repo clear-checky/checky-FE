@@ -306,7 +306,7 @@ export default function UploadPage() {
                 type="checkbox"
                 checked={isAgreed}
                 onChange={e => setIsAgreed(e.target.checked)}
-                className="w-4 h-4 text-secondary border-gray-300 rounded focus:ring-secondary accent-secondary flex-shrink-0 mt-0.5"
+                className="w-4 h-4 text-secondary border-gray-300 rounded focus:ring-secondary accent-secondary flex-shrink-0 mt-0.5 cursor-pointer"
               />
               <span className="text-sm text-gray leading-relaxed">
                 AI가 계약서를 분석하는 과정에서 성명, 연락처 등 일부 개인정보가
@@ -326,7 +326,7 @@ export default function UploadPage() {
               disabled={!uploadedFile || !isAgreed}
               className={`px-8 py-3 rounded-[10px] font-bold transition-opacity ${
                 uploadedFile && isAgreed
-                  ? 'bg-secondary text-white hover:opacity-90'
+                  ? 'bg-secondary text-white hover:opacity-90 cursor-pointer'
                   : 'bg-gray/30 text-gray cursor-not-allowed'
               }`}
             >
