@@ -271,7 +271,10 @@ export default function UploadPage() {
     }
   };
   return (
-    <div className="min-h-screen bg-white">
+    <div
+      className="min-h-screen bg-white"
+      style={{ minHeight: 'calc(100vh - 72px)' }}
+    >
       <div className="mx-auto max-w-5xl px-6 py-10">
         {/* 업로드 카드 */}
         <div className="bg-white rounded-[10px] border border-light-gray/60 shadow-sm p-8">
