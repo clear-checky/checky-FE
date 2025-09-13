@@ -96,3 +96,50 @@ body {
     box-shadow: none !important;
   }
 }
+
+/* 세로선 그라데이션 애니메이션 - 왼쪽에서 오른쪽으로 */
+@keyframes vertical-gradient {
+  0% {
+    background-position: -200% 0%;
+  }
+
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
+.animate-diagonal-gradient {
+  background: linear-gradient(90deg, rgb(0, 73, 0), rgb(37, 128, 37), #000000, #24490b);
+  background-size: 400% 100%;
+  animation: vertical-gradient 10s ease-in-out infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 텍스트 스트로크 색상 애니메이션 - 글자와 같은 색상 */
+@keyframes stroke-color {
+  0% {
+    --stroke-color: rgb(0, 73, 0);
+  }
+
+  25% {
+    --stroke-color: rgb(37, 128, 37);
+  }
+
+  50% {
+    --stroke-color: #000000;
+  }
+
+  75% {
+    --stroke-color: #24490b;
+  }
+
+  100% {
+    --stroke-color: rgb(0, 73, 0);
+  }
+}
+
+.animate-stroke-gradient {
+  animation: stroke-color 10s ease-in-out infinite;
+}

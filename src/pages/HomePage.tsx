@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import HeaderButton from '../components/common/HeaderButton';
+import Footer from '../components/common/Footer';
 
 export default function HomePage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [hasReachedLastSection, setHasReachedLastSection] = useState(false);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const lastSectionRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
@@ -10,7 +12,8 @@ export default function HomePage() {
   const thirdFeatureRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
+    // 기능 섹션들을 위한 observer (민감하게)
+    const featuresObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const targetId = entry.target.getAttribute('data-section-id');
@@ -21,15 +24,9 @@ export default function HomePage() {
               setVisibleSections(prev => new Set(prev).add(targetId));
             }
 
-            // 기능 섹션들(첫 번째, 두 번째, 세 번째)이 보이면 다크모드 해제
-            if (entry.target === featuresRef.current ||
-              entry.target === secondFeatureRef.current ||
-              entry.target === thirdFeatureRef.current) {
+            // 마지막 섹션에 도달하지 않았을 때만 다크모드 해제 (초록 배경)
+            if (!hasReachedLastSection) {
               setIsDarkMode(false);
-            }
-            // 마지막 섹션만 보이면 다크모드 활성화
-            else if (entry.target === lastSectionRef.current) {
-              setIsDarkMode(true);
             }
           } else {
             // 섹션이 보이지 않으면 가시성 상태에서 제거
@@ -40,42 +37,64 @@ export default function HomePage() {
                 return newSet;
               });
             }
-
-            // 마지막 섹션에서 벗어나면 다크모드 해제
-            if (entry.target === lastSectionRef.current) {
-              setIsDarkMode(false);
-            }
           }
         });
       },
       {
         threshold: 0.1, // 10% 보이면 트리거
-        rootMargin: '0px 0px 100px 0px' // 하단에서 100px 전에 트리거
+        rootMargin: '0px 0px 0px 0px' // 마진 없이 정확히 감지
       }
     );
 
-    const refs = [
-      { ref: lastSectionRef, id: 'last' },
+    // 마지막 섹션을 위한 observer (바로 보이면 즉시 트리거)
+    const lastSectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // 마지막 섹션이 보이면 즉시 다크모드 활성화
+            setIsDarkMode(true);
+          } else {
+            // 마지막 섹션에서 벗어나면 hasReachedLastSection을 false로 리셋
+            setHasReachedLastSection(false);
+          }
+        });
+      },
+      {
+        threshold: 0, // 0% 즉시 트리거 (1px이라도 보이면)
+        rootMargin: '0px 0px 0px 0px' // 마진 없이 정확히 감지
+      }
+    );
+
+    // 기능 섹션들을 관찰
+    const featureRefs = [
       { ref: featuresRef, id: 'features' },
       { ref: secondFeatureRef, id: 'second' },
       { ref: thirdFeatureRef, id: 'third' }
     ];
 
-    refs.forEach(({ ref, id }) => {
+    featureRefs.forEach(({ ref, id }) => {
       if (ref.current) {
         ref.current.setAttribute('data-section-id', id);
-        observer.observe(ref.current);
+        featuresObserver.observe(ref.current);
       }
     });
 
+    // 마지막 섹션을 관찰
+    if (lastSectionRef.current) {
+      lastSectionObserver.observe(lastSectionRef.current);
+    }
+
     return () => {
-      refs.forEach(({ ref }) => {
+      featureRefs.forEach(({ ref }) => {
         if (ref.current) {
-          observer.unobserve(ref.current);
+          featuresObserver.unobserve(ref.current);
         }
       });
+      if (lastSectionRef.current) {
+        lastSectionObserver.unobserve(lastSectionRef.current);
+      }
     };
-  }, []);
+  }, [hasReachedLastSection]);
 
   return (
     <div className="min-h-dvh relative overflow-hidden">
@@ -86,9 +105,15 @@ export default function HomePage() {
       <div className={`absolute inset-0 bg-black transition-transform ${isDarkMode ? 'duration-[4000ms] ease-out' : 'duration-[1000ms] ease-in'} ${isDarkMode ? 'translate-y-0' : 'translate-y-full'
         }`}></div>
       <div className="relative z-10 flex flex-col justify-center items-center mt-40">
-        <img src="src/assets/Checky.svg"
-          className="w-200 h-auto" />
-        <h1 className="font-bold text-xl text-secondary mt-20">지금 바로 사용해보세요!</h1>
+        <div className="text-center animate-diagonal-gradient">
+          <p className="text-[44px] font-extrabold text-black mb-2">숨은 위험까지 찾아내는 든든한 계약 비서,</p>
+          <h1 className="text-[120px] font-black text-black animate-diagonal-gradient" style={{
+            fontWeight: 1000,
+            letterSpacing: '2px',
+            WebkitTextStroke: '4px transparent'
+          }}>Checky</h1>
+        </div>
+        <h2 className="font-bold text-xl text-secondary mt-20">지금 바로 사용해보세요!</h2>
         <div className="flex items-center mt-4">
           <HeaderButton
             to="/upload"
@@ -218,14 +243,13 @@ export default function HomePage() {
             <h1 className={`text-md text-[#FFFFFF] leading-relaxed break-keep whitespace-pre-line transition-all duration-1000 ease-out delay-200 ${isDarkMode ? 'transform translate-y-0 opacity-100' : 'transform translate-y-8 opacity-90'
               }`}>
               {'개인정보 보호를 위해 모든 정보는 24시간 내 영구 삭제됩니다.'}</h1>
-            <HeaderButton
-              to="/upload"
-              variant="primary"
-              className={`mt-[30px] mb-[180px] transition-all duration-3000 ease-out delay-400 hover:scale-105 hover:bg-gray-800 ${isDarkMode ? 'transform translate-y-0 opacity-100' : 'transform translate-y-8 opacity-90'
+            <button
+              onClick={() => window.location.href = '/upload'}
+              className={`mt-[30px] mb-[180px] transition-all duration-3000 ease-out delay-400 hover:scale-105 bg-white text-green px-6 py-2 rounded-[10px] font-bold hover:bg-gray-100 ${isDarkMode ? 'transform translate-y-0 opacity-100' : 'transform translate-y-8 opacity-90'
                 }`}
             >
               분석하러 가기
-            </HeaderButton>
+            </button>
           </div>
           <div className="basis-1/2 flex justify-start pl-35">
             <img
@@ -237,8 +261,10 @@ export default function HomePage() {
           </div>
         </div>
 
-
       </div>
+
+      {/* 푸터 - 홈페이지 메인 컨테이너 밖에서 독립적으로 전체 가로 길이 사용 */}
+      <Footer />
 
     </div>
   );
