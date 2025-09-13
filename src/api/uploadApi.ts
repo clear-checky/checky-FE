@@ -1,5 +1,7 @@
 // API 호출 함수들
-const API_BASE_URL = 'http://localhost:8000'; // FastAPI 서버 URL
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ||
+  'http://127.0.0.1:8000'; // FastAPI 서버 URL
 const USE_MOCK_DATA = false; // 백엔드 연결 문제로 임시 Mock 데이터 사용
 
 // 계약서를 문장별로 파싱하여 articles 형태로 변환
