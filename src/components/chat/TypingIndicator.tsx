@@ -17,7 +17,7 @@ export default function TypingIndicator() {
               style={{ animationDelay: '0.2s' }}
             ></div>
           </div>
-          <span className="text-xs text-gray ml-2">
+          <span className="text-[16px] text-gray ml-2">
             체키가 답변을 준비 중입니다...
           </span>
         </div>
