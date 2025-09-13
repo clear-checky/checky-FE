@@ -48,9 +48,7 @@ export interface ChatResponse {
   conversation_history?: ChatMessage[];
 }
 
-const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ||
-  'http://127.0.0.1:8000';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL.replace(/\/$/, '');
 
 /** 공통 fetch (타임아웃/에러 메시지 통일) */
 async function request<T>(
