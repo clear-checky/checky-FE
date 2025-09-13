@@ -37,10 +37,10 @@ function TypewriterText({
         components={{
           p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
           ul: ({ children }) => (
-            <ul className="mb-2 last:mb-0 pl-4">{children}</ul>
+            <ul className="mb-2 last:mb-0 pl-4 list-disc">{children}</ul>
           ),
           ol: ({ children }) => (
-            <ol className="mb-2 last:mb-0 pl-4">{children}</ol>
+            <ol className="mb-2 last:mb-0 pl-4 list-decimal">{children}</ol>
           ),
           li: ({ children }) => <li className="mb-1">{children}</li>,
           code: ({ children, className }) => {
@@ -103,10 +103,12 @@ export default function Message({ text, isUser }: MessageProps) {
                   <p className="mb-2 last:mb-0">{children}</p>
                 ),
                 ul: ({ children }) => (
-                  <ul className="mb-2 last:mb-0 pl-4">{children}</ul>
+                  <ul className="mb-2 last:mb-0 pl-4 list-disc">{children}</ul>
                 ),
                 ol: ({ children }) => (
-                  <ol className="mb-2 last:mb-0 pl-4">{children}</ol>
+                  <ol className="mb-2 last:mb-0 pl-4 list-decimal">
+                    {children}
+                  </ol>
                 ),
                 li: ({ children }) => <li className="mb-1">{children}</li>,
                 code: ({ children, className }) => {
