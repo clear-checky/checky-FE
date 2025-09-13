@@ -20,13 +20,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: '표준 근로계약서에 대해 알고 싶어.',
-      isUser: true,
-      timestamp: new Date(),
-    },
-    {
-      id: 2,
-      text: '네, 표준근로계약서에 대해 자세히 알려드릴게요. 표준근로계약서란 대한민국 고용노동부에서 근로기준법에 따라 필수적인 근로 조건을 명시하여, 누구나 쉽게 사용할 수 있도록 만들어 배포하는 표준 양식의 근로계약서를 말합니다.',
+      text: '안녕하세요, 체키입니다! 궁금한 점은 무엇이든지 물어보세요!',
       isUser: false,
       timestamp: new Date(),
     },
@@ -143,7 +137,7 @@ export default function ChatPage() {
   }, [inputText]);
 
   return (
-    <div className="h-screen flex flex-col pt-18">
+    <div className="h-[calc(100vh-72px)] flex flex-col">
       {/* 채팅 메시지 영역  */}
       <div className="flex-1 overflow-y-auto px-16 py-10">
         <div className="space-y-4">
