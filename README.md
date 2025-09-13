@@ -67,7 +67,7 @@
 ### Backend
 
 * **FastAPI**
-* **OpenAI: 계약서 조항 분석
+* **OpenAI**: 계약서 조항 분석
 * **EasyOCR, pytesseract**: OCR 및 텍스트 추출
 * **PyPDF, python-docx**: 문서 파싱
 * **배포**: Render.com (BE), Vercel (FE)
