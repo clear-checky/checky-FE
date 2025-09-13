@@ -101,9 +101,9 @@ export default function HomePage() {
         <img src="src/assets/user.svg"
           className="w-300 h-auto" />
 
-        <h1 className="font-medium text-xl text-[#707070] mt-50 whitespace-pre-line text-center">
+        <h1 className="font-medium text-xl text-[#707070] mt-50 whitespace-pre-line text-center animate-bounce-slow">
           {`어렵고 복잡한 법률 용어,\n왠지 모르게 불안한 계약서,`}</h1>
-        <h1 className="font-black text-3xl text-[#121212] mb-[150px] whitespace-pre-line text-center mt-6">
+        <h1 className="font-black text-3xl text-[#121212] mb-[150px] whitespace-pre-line text-center mt-6 animate-bounce-slow-delayed">
           AI 개인 법률 리스크 관리 서비스 Checky로 해결.</h1>
         <div ref={featuresRef} className={`mt-[50px] w-full flex items-center transition-all duration-700 ease-out ${visibleSections.has('features')
           ? 'transform translate-y-0 opacity-100'

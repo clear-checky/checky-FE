@@ -12,14 +12,12 @@
 }
 
 .bg-gradient-primary {
-  background: linear-gradient(
-    rgba(255, 255, 255, 0.8) 0%,
-    #FFFFFF 0%,
-    #DFEDE7 30%,
-    #B9C9C2 59%,
-    #85AA9A 73%,
-    #577467 91%
-  );
+  background: linear-gradient(rgba(255, 255, 255, 0.8) 0%,
+      #FFFFFF 0%,
+      #DFEDE7 30%,
+      #B9C9C2 59%,
+      #85AA9A 73%,
+      #577467 91%);
 }
 
 body {
@@ -47,14 +45,54 @@ body {
   background: #9ca3af;
 }
 
+/* 둥둥 애니메이션 */
+@keyframes bounce-slow {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes bounce-slow-delayed {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
+}
+
+.animate-bounce-slow-delayed {
+  animation: bounce-slow-delayed 3s ease-in-out infinite 0.5s;
+}
+
 /* 프린트 부분  */
 @media print {
-   body { zoom: 0.8; } 
+  body {
+    zoom: 0.8;
+  }
 
-   * {
+  * {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-.shadow, .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; }
-}
 
+  .shadow,
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+}
