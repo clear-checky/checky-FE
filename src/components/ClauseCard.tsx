@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import type { Article } from './types';
 import SentenceRow from './SentenceRow';
 
@@ -20,27 +21,38 @@ export default function ClauseCard({ article }: { article: Article }) {
   const bodyVisibility = `${open ? 'block' : 'hidden'} print:block`;
 
   return (
-    <div className={`rounded-[10px] border ${wrapClasses} shadow-sm`}>
+    <div className={`rounded-[10px] border ${wrapClasses} shadow-sm transition-all duration-200 hover:shadow-md`}>
       {/* 🔹 제목은 항상 표시 */}
       <div className="w-full px-5 py-4">
         <div
           onClick={() => setOpen(v => !v)}
-          className="flex items-center justify-between "
+          className="flex items-center justify-between cursor-pointer group"
         >
-          <h3 className="text-lg font-bold text-secondary">{article.title}</h3>
+          <h3 className={`text-lg font-bold text-black transition-colors duration-200 ${hasWarningOrDanger ? 'group-hover:text-red' : 'group-hover:text-green'}`}>{article.title}</h3>
           {/* 🔹 토글 버튼은 프린트에서만 숨김 */}
-          <button type="button" className="text-gray text-sm print:hidden">
+          <button
+            type="button"
+            className={`text-gray text-sm print:hidden transition-colors duration-200 flex items-center gap-1 ${hasWarningOrDanger ? 'group-hover:text-red' : 'group-hover:text-green'}`}
+          >
             {open ? '접기' : '자세히'}
+            <ChevronDown
+              size={14}
+              className={`transform transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+            />
           </button>
         </div>
       </div>
 
       {/* 🔹 본문: 화면에서는 open 상태에 따르고, 프린트에서는 항상 보임 */}
-      <div className={`${bodyVisibility} px-5 pb-5 space-y-3`}>
+      <div className={`${bodyVisibility} px-5 pb-5 space-y-3 transition-all duration-300 ease-in-out`}>
         {sentences.length === 0 ? (
-          <p className="text-sm text-gray">표시할 문장이 없습니다.</p>
+          <div className="flex items-center justify-center py-8">
+            <p className="text-sm text-gray/70 italic">표시할 문장이 없습니다.</p>
+          </div>
         ) : (
-          sentences.map(s => <SentenceRow key={s.id} sentence={s} />)
+          <div className="space-y-2">
+            {sentences.map(s => <SentenceRow key={s.id} sentence={s} />)}
+          </div>
         )}
       </div>
     </div>
