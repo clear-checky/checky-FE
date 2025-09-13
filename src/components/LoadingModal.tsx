@@ -42,10 +42,10 @@ export default function LoadingModal({
           Checky
         </div>
         <div className="text-gray mb-8">
-          {stage === 'uploading' && '파일을 업로드하고 있습니다...'}
-          {stage === 'parsing' && '텍스트를 문장별로 분리하고 있습니다...'}
-          {stage === 'analyzing' && '체키가 당신의 계약서를 분석 중입니다.'}
-          {stage === 'completed' && '분석이 완료되었습니다!'}
+          {stage === 'uploading' && '체키가 파일을 읽고 있어요!'}
+          {stage === 'parsing' && '체키가 파일을 읽고 있어요!'}
+          {stage === 'analyzing' && '체키가 계약서를 분석 중이에요!'}
+          {stage === 'completed' && '분석이 완료되었어요!'}
         </div>
         <div className="w-full bg-gray/20 rounded-full h-4 mb-2">
           <div
@@ -54,7 +54,7 @@ export default function LoadingModal({
           ></div>
         </div>
         <div className="text-gray">
-          {stage === 'completed' ? '분석완료!' : `${progress}%`}
+          {stage === 'completed' ? '100%' : `${progress}%`}
         </div>
       </div>
     </div>

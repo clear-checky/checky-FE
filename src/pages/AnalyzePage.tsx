@@ -49,16 +49,25 @@ export default function AnalyzePage() {
           console.log('parsedArticles 구조:', location.state.parsedArticles);
           console.log('전달받은 fileName:', location.state.fileName);
           setArticles(location.state.parsedArticles as Article[]);
-          // 파일명 설정 (확장자 제거)
-          if (location.state.fileName) {
+          // AI 추출 제목 사용
+          if (
+            location.state.analysisResult &&
+            location.state.analysisResult.title
+          ) {
+            console.log(
+              'AI 추출 제목 설정:',
+              location.state.analysisResult.title
+            );
+            setFileName(location.state.analysisResult.title);
+          } else if (location.state.fileName) {
             const fileNameWithoutExt = location.state.fileName.replace(
               /\.[^/.]+$/,
               ''
             );
-            console.log('fileName 설정:', fileNameWithoutExt);
+            console.log('fallback fileName 설정:', fileNameWithoutExt);
             setFileName(fileNameWithoutExt);
           } else {
-            console.log('fileName이 없어서 기본값 사용');
+            console.log('제목 정보가 없어서 기본값 사용');
           }
         } else if (taskId) {
           // 백엔드 파이프라인 결과 사용
@@ -66,13 +75,16 @@ export default function AnalyzePage() {
           console.log('백엔드에서 받은 데이터 구조:', res);
           console.log('백엔드에서 받은 file_name:', res.file_name);
           setArticles(res.articles as Article[]);
-          // 백엔드에서 받은 파일명 설정 (확장자 제거)
-          if (res.file_name) {
+          // 백엔드에서 받은 AI 추출 제목 사용
+          if (res.title) {
+            console.log('백엔드 AI 추출 제목 설정:', res.title);
+            setFileName(res.title);
+          } else if (res.file_name) {
             const fileNameWithoutExt = res.file_name.replace(/\.[^/.]+$/, '');
-            console.log('백엔드 file_name 설정:', fileNameWithoutExt);
+            console.log('fallback file_name 설정:', fileNameWithoutExt);
             setFileName(fileNameWithoutExt);
           } else {
-            console.log('백엔드에서 file_name이 없어서 기본값 사용');
+            console.log('백엔드에서 제목 정보가 없어서 기본값 사용');
           }
         } else {
           // taskId가 없으면 에러 표시
