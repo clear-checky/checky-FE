@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 import sendbtn from '../assets/sendbtn.svg';
 import * as api from '../api/api';
+import chatbot from '../assets/chatbot.svg';
 
 interface Message {
   id: number;
@@ -146,6 +148,9 @@ export default function ChatPage() {
               key={message.id}
               className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} message-animation`}
             >
+              {!message.isUser && (
+                <img src={chatbot} alt="chatbot" className="w-10 h-10" />
+              )}
               <div
                 className={`chat-message px-5 py-3 rounded-[20px] ${
                   message.isUser
@@ -153,9 +158,63 @@ export default function ChatPage() {
                     : 'bg-white text-black'
                 }`}
               >
-                <p className="text-[16px] leading-relaxed whitespace-pre-wrap">
-                  {message.text}
-                </p>
+                <div className="text-[16px] leading-relaxed prose prose-sm max-w-none">
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => (
+                        <p className="mb-2 last:mb-0">{children}</p>
+                      ),
+                      ul: ({ children }) => (
+                        <ul className="mb-2 last:mb-0 pl-4">{children}</ul>
+                      ),
+                      ol: ({ children }) => (
+                        <ol className="mb-2 last:mb-0 pl-4">{children}</ol>
+                      ),
+                      li: ({ children }) => (
+                        <li className="mb-1">{children}</li>
+                      ),
+                      code: ({ children, className }) => {
+                        const isInline = !className;
+                        return isInline ? (
+                          <code className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono">
+                            {children}
+                          </code>
+                        ) : (
+                          <code className="block bg-gray-100 p-2 rounded text-sm font-mono overflow-x-auto">
+                            {children}
+                          </code>
+                        );
+                      },
+                      pre: ({ children }) => (
+                        <pre className="bg-gray-100 p-2 rounded overflow-x-auto mb-2">
+                          {children}
+                        </pre>
+                      ),
+                      blockquote: ({ children }) => (
+                        <blockquote className="border-l-4 border-gray-300 pl-4 italic mb-2">
+                          {children}
+                        </blockquote>
+                      ),
+                      h1: ({ children }) => (
+                        <h1 className="text-xl font-bold mb-2">{children}</h1>
+                      ),
+                      h2: ({ children }) => (
+                        <h2 className="text-lg font-bold mb-2">{children}</h2>
+                      ),
+                      h3: ({ children }) => (
+                        <h3 className="text-base font-bold mb-2">{children}</h3>
+                      ),
+                      strong: ({ children }) => (
+                        <strong className="font-bold">{children}</strong>
+                      ),
+                      em: ({ children }) => (
+                        <em className="italic">{children}</em>
+                      ),
+                    }}
+                  >
+                    {message.text}
+                  </ReactMarkdown>
+                </div>
               </div>
             </div>
           ))}
@@ -163,6 +222,7 @@ export default function ChatPage() {
           {/* 타이핑 인디케이터 */}
           {isTyping && (
             <div className="flex justify-start message-animation">
+              <img src={chatbot} alt="chatbot" className="w-10 h-10 mr-5" />
               <div className="bg-white text-gray shadow-sm border border-gray px-4 py-3 rounded-2xl">
                 <div className="flex items-center space-x-1">
                   <div className="flex space-x-1">
