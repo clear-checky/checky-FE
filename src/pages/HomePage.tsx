@@ -118,7 +118,7 @@ export default function HomePage() {
           <HeaderButton
             to="/upload"
             variant="primary"
-            className="mt-4 mb-[120px]"
+            className="mt-4 mb-[120px] animate-bounce-float"
           >
             분석하러 가기
           </HeaderButton>
@@ -254,7 +254,7 @@ export default function HomePage() {
           <div className="basis-1/2 flex justify-start pl-35">
             <img
               src="src/assets/MacBook.svg"
-              className={`w-[360px] sm:w-[640px] md:w-[840px] lg:w-[1040px] h-auto mt-20 transition-all duration-1000 ease-out delay-300 ${isDarkMode ? 'transform translate-y-0 opacity-100' : 'transform translate-y-8 opacity-90'
+              className={`w-[400px] sm:w-[720px] md:w-[960px] lg:w-[1200px] h-auto mt-20 transition-all duration-1000 ease-out delay-300 animate-bounce-float ${isDarkMode ? 'transform translate-y-0 opacity-100' : 'transform translate-y-8 opacity-90'
                 }`}
               alt="report"
             />
