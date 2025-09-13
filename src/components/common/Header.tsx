@@ -1,8 +1,7 @@
-import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.svg';
+import HeaderButton from './HeaderButton';
 
 export default function Header() {
-  const navigate = useNavigate();
 
   return (
     <header className="bg-white shadow-sm h-18 flex items-center fixed top-0 left-0 right-0 z-50">
@@ -23,34 +22,22 @@ export default function Header() {
         <div className="flex items-center space-x-8">
           {/* 메뉴 */}
           <div className="flex items-center space-x-8">
-            <button
-              onClick={() => navigate('/')}
-              className="font-regular cursor-pointer"
-            >
+            <HeaderButton to="/">
               홈
-            </button>
-            <button
-              onClick={() => navigate('/chat')}
-              className="font-regular cursor-pointer"
-            >
+            </HeaderButton>
+            <HeaderButton to="/chat">
               체키에게 물어보기
-            </button>
-            <button
-              onClick={() => navigate('/faq')}
-              className="font-regular cursor-pointer"
-            >
+            </HeaderButton>
+            <HeaderButton to="/faq">
               FAQ
-            </button>
+            </HeaderButton>
           </div>
 
           {/* 버튼 */}
           <div className="flex items-center">
-            <button
-              onClick={() => navigate('/upload')}
-              className="bg-secondary text-white px-6 py-2 rounded-[10px] font-bold cursor-pointer"
-            >
+            <HeaderButton to="/upload" variant="primary">
               분석하러 가기
-            </button>
+            </HeaderButton>
           </div>
         </div>
       </div>
