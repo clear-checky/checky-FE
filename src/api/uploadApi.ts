@@ -156,7 +156,7 @@ export const getAnalysisResult = async (taskId: string) => {
 export { parseContractToArticles };
 
 // 문장별 분석 함수 (백엔드 API 호출)
-export const analyzeSentences = async (sentences: any[]) => {
+export const analyzeSentences = async (sentences: any[], fileName?: string) => {
   try {
     console.log('AI 분석 요청 데이터:', sentences);
 
@@ -173,6 +173,7 @@ export const analyzeSentences = async (sentences: any[]) => {
             sentences: sentences, // 단순한 문장 배열을 articles 안에 넣어서 전송
           },
         ],
+        file_name: fileName || '계약서', // 파일명 전달
       }),
     });
 
