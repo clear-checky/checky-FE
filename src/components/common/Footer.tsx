@@ -18,7 +18,7 @@ export default function Footer() {
                             안전하고 투명한 계약서를 작성하세요.
                         </p>
                         <div className="text-xs text-gray-400">
-                            © 2024 Checky. All rights reserved.
+                            © 2025 Checky. All rights reserved.
                         </div>
                     </div>
 
