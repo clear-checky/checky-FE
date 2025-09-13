@@ -91,11 +91,10 @@ export default function ChatPage() {
               className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} message-animation`}
             >
               <div
-                className={`chat-message px-5 py-3 rounded-[20px] ${
-                  message.isUser
+                className={`chat-message px-5 py-3 rounded-[20px] ${message.isUser
                     ? 'bg-primary text-black'
                     : 'bg-white text-black'
-                }`}
+                  }`}
               >
                 <p className="text-[16px] leading-relaxed whitespace-pre-wrap">
                   {message.text}
