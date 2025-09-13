@@ -20,7 +20,7 @@ export default function DownloadPdfButton({
       <span className="relative z-10">{label}</span>
       <Download className="h-4 w-4 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
       {/* 호버 시 왼쪽에서 오른쪽으로 움직이는 초록색 배경 */}
-      <div className="absolute inset-0 bg-green/80 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></div>
+      <div className="absolute inset-0 bg-black/80 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></div>
     </button>
   );
 }
