@@ -24,8 +24,26 @@ export interface AnalyzeResponse {
   safety_percent: number;
 }
 
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
+
+export interface ChatRequest {
+  message: string;
+  conversation_history: ChatMessage[];
+}
+
+export interface ChatRequestAlt {
+  question: string;
+  conversation_history: ChatMessage[];
+}
+
 export interface ChatResponse {
-  answer: string;
+  answer?: string;
+  message?: string;
+  conversation_history?: ChatMessage[];
 }
 
 const BASE_URL =
@@ -56,6 +74,7 @@ async function request<T>(
       let detail = '';
       try {
         const body = await res.json();
+        console.error('API Error Response:', body);
         detail = body?.detail || JSON.stringify(body);
       } catch {
         detail = res.statusText;
@@ -84,10 +103,73 @@ export function analyzeContract(articles: Article[]) {
 }
 
 /** ───── 챗봇 Q&A ───── */
-export function askChecky(question: string, articles: Article[]) {
-  return request<ChatResponse>('/contract/chat', {
+export function askChecky(
+  message: string,
+  conversationHistory: ChatMessage[] = []
+) {
+  console.log('Sending chat request:', {
+    message,
+    conversation_history: conversationHistory,
+  });
+
+  // 먼저 'message' 필드로 시도
+  return request<ChatResponse>('/chat/', {
     method: 'POST',
-    body: JSON.stringify({ question, articles }),
+    body: JSON.stringify({
+      message,
+      conversation_history: conversationHistory,
+    }),
+  });
+}
+
+/** ───── 챗봇 Q&A (대안) ───── */
+export function askCheckyAlt(
+  message: string,
+  conversationHistory: ChatMessage[] = []
+) {
+  console.log('Sending chat request (alt):', {
+    question: message,
+    conversation_history: conversationHistory,
+  });
+
+  // 'question' 필드로 시도
+  return request<ChatResponse>('/chat/', {
+    method: 'POST',
+    body: JSON.stringify({
+      question: message,
+      conversation_history: conversationHistory,
+    }),
+  });
+}
+
+/** ───── 챗봇 Q&A (간단한 버전) ───── */
+export function askCheckySimple(message: string) {
+  console.log('Sending simple chat request:', { message });
+
+  // 가장 간단한 형태로 시도
+  return request<ChatResponse>('/chat/', {
+    method: 'POST',
+    body: JSON.stringify({ message }),
+  });
+}
+
+/** ───── 챗봇 Q&A (다른 필드명 시도) ───── */
+export function askCheckyWithHistory(
+  message: string,
+  conversationHistory: ChatMessage[] = []
+) {
+  console.log('Sending chat request with history:', {
+    message,
+    history: conversationHistory,
+  });
+
+  // 'history' 필드명으로 시도
+  return request<ChatResponse>('/chat/', {
+    method: 'POST',
+    body: JSON.stringify({
+      message,
+      history: conversationHistory,
+    }),
   });
 }
 
