@@ -1,0 +1,221 @@
+// API 호출 함수들
+const API_BASE_URL = 'http://localhost:8000'; // FastAPI 서버 URL
+const USE_MOCK_DATA = false; // 백엔드 연결 문제로 임시 Mock 데이터 사용
+
+// 계약서를 문장별로 파싱하여 articles 형태로 변환
+const parseContractToArticles = (text: string) => {
+  // 텍스트 전처리
+  const cleanedText = text
+    .replace(/\s+/g, ' ') // 여러 공백을 하나로
+    .replace(/\n+/g, ' ') // 줄바꿈을 공백으로
+    .trim();
+
+  // 문장 단위로 분리 (마침표, 느낌표, 물음표 기준)
+  const sentences = cleanedText
+    .split(/[.!?]+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 10) // 너무 짧은 문장 제거
+    .map((sentence, index) => ({
+      id: `sentence-${index + 1}`,
+      text: sentence,
+      risk: 'safe' as const, // 임시값, 백엔드에서 분석 후 업데이트
+      why: '',
+      fix: '',
+    }));
+
+  console.log(`총 ${sentences.length}개의 문장으로 파싱됨`);
+
+  // 단순하게 문장 배열만 반환 (백엔드에서 조항별 그룹화 처리)
+  return sentences;
+};
+
+// Mock 데이터 함수들
+const mockUploadFile = async (file: File) => {
+  // 실제 API 호출을 시뮬레이션
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  return {
+    success: true,
+    message: '파일이 성공적으로 업로드되었습니다.',
+    task_id: `file_${Date.now()}`,
+    file_name: file.name,
+    file_size: file.size,
+    file_type: file.type.split('/')[1],
+    extracted_text: `<<${file.name}>>\n\n- 이 파일은 Mock 데이터로 생성된 추출 텍스트입니다.\n- 실제 OCR 추출 결과를 시뮬레이션합니다.\n- 계약서 분석을 위한 텍스트 내용이 여기에 표시됩니다.`,
+  };
+};
+
+const mockCheckAnalysisStatus = async (taskId: string) => {
+  // 실제 API 호출을 시뮬레이션
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  // 랜덤하게 상태 반환 (테스트용)
+  const random = Math.random();
+  if (random < 0.3) {
+    return 'processing';
+  } else if (random < 0.9) {
+    return 'completed';
+  } else {
+    return 'failed';
+  }
+};
+
+// 실제 API 호출 함수들
+export const uploadFile = async (file: File) => {
+  if (USE_MOCK_DATA) {
+    return mockUploadFile(file);
+  }
+
+  console.log('파일 업로드 시작:', file.name);
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    console.log('업로드 응답 상태:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('업로드 실패:', response.status, errorText);
+      throw new Error(`파일 업로드에 실패했습니다. (${response.status})`);
+    }
+
+    const result = await response.json();
+    console.log('업로드 성공:', result);
+    return result;
+  } catch (error) {
+    console.error('업로드 에러:', error);
+    throw error;
+  }
+};
+
+export const checkAnalysisStatus = async (taskId: string) => {
+  if (USE_MOCK_DATA) {
+    return mockCheckAnalysisStatus(taskId);
+  }
+
+  console.log('상태 확인 시작:', taskId);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/upload/status/${taskId}`);
+    console.log('상태 확인 응답:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('상태 확인 실패:', response.status, errorText);
+      throw new Error(`분석 상태 확인에 실패했습니다. (${response.status})`);
+    }
+
+    const data = await response.json();
+    console.log('상태 확인 성공:', data);
+    return data.status; // 백엔드에서 JSON 객체의 status 필드 반환
+  } catch (error) {
+    console.error('상태 확인 에러:', error);
+    throw error;
+  }
+};
+
+export const getAnalysisResult = async (taskId: string) => {
+  if (USE_MOCK_DATA) {
+    // Mock 데이터로 분석 결과 반환
+    return {
+      id: taskId,
+      title: '계약서 분석 결과',
+      articles: [
+        {
+          id: '1',
+          title: '계약서 조항 1',
+          sentences: [
+            {
+              id: '1-1',
+              text: '이 계약서는 안전합니다.',
+              risk: 'safe' as const,
+              why: '표준 계약 조건을 따르고 있습니다.',
+              fix: '추가 조치 불필요',
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  // 백엔드에서 분석 결과 API 호출
+  const response = await fetch(`${API_BASE_URL}/upload/analysis/${taskId}`);
+
+  if (!response.ok) {
+    throw new Error('분석 결과를 가져오는데 실패했습니다.');
+  }
+
+  return response.json();
+};
+
+// 계약서 파싱 함수 export
+export { parseContractToArticles };
+
+// 문장별 분석 함수 (백엔드 API 호출)
+export const analyzeSentences = async (sentences: any[], fileName?: string) => {
+  try {
+    console.log('AI 분석 요청 데이터:', sentences);
+
+    const response = await fetch(`${API_BASE_URL}/contract/analyze`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        articles: [
+          {
+            id: 1,
+            title: '계약서',
+            sentences: sentences, // 단순한 문장 배열을 articles 안에 넣어서 전송
+          },
+        ],
+        file_name: fileName || '계약서', // 파일명 전달
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('AI 분석 실패:', response.status, errorText);
+      throw new Error('문장 분석에 실패했습니다.');
+    }
+
+    const result = await response.json();
+    console.log('AI 분석 결과:', result);
+    return result;
+  } catch (error) {
+    console.error('문장 분석 에러:', error);
+    throw error;
+  }
+};
+
+// AI 분석 결과를 백엔드에 저장
+export const saveAnalysisResult = async (
+  taskId: string,
+  analysisResult: any
+) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/upload/save-analysis`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        task_id: taskId,
+        analysis_result: analysisResult,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('분석 결과 저장에 실패했습니다.');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('분석 결과 저장 에러:', error);
+    throw error;
+  }
+};

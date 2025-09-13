@@ -1,0 +1,206 @@
+@import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+@theme {
+  --color-primary: #dfede7;
+  --color-secondary: #2e3c23;
+  --color-red: #ff0000;
+  --color-yellow: #ff8c00;
+  --color-green: #4f8c73;
+  --color-gray: #797979;
+  --color-light-gray: #d9d9d9;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(
+    rgba(255, 255, 255, 0.8) 0%,
+    #ffffff 0%,
+    #dfede7 30%,
+    #b9c9c2 59%,
+    #85aa9a 73%,
+    #577467 91%
+  );
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+}
+
+/* 스크롤바 스타일링 */
+.chat-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+.chat-container::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* 둥둥 애니메이션 */
+@keyframes bounce-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes bounce-slow-delayed {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
+}
+
+.animate-bounce-slow-delayed {
+  animation: bounce-slow-delayed 3s ease-in-out infinite 0.5s;
+}
+
+/* 프린트 부분  */
+@media print {
+  body {
+    zoom: 0.8;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .shadow,
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+}
+
+/* 세로선 그라데이션 애니메이션 - 왼쪽에서 오른쪽으로 */
+@keyframes vertical-gradient {
+  0% {
+    background-position: -200% 0%;
+  }
+
+  100% {
+    background-position: 200% 0%;
+  }
+}
+
+.animate-diagonal-gradient {
+  background: linear-gradient(
+    90deg,
+    rgb(0, 73, 0),
+    rgb(59, 142, 59),
+    #000000,
+    #24490b
+  );
+  background-size: 400% 100%;
+  animation: vertical-gradient 10s ease-in-out infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 텍스트 스트로크 색상 애니메이션 - 글자와 같은 색상 */
+@keyframes stroke-color {
+  0% {
+    --stroke-color: rgb(0, 73, 0);
+  }
+
+  25% {
+    --stroke-color: rgb(59, 142, 59);
+  }
+
+  50% {
+    --stroke-color: #000000;
+  }
+
+  75% {
+    --stroke-color: #24490b;
+  }
+
+  100% {
+    --stroke-color: rgb(0, 73, 0);
+  }
+}
+
+.animate-stroke-gradient {
+  animation: stroke-color 10s ease-in-out infinite;
+}
+
+/* 둥둥 애니메이션 */
+@keyframes bounce-float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-bounce-float {
+  animation: bounce-float 2s ease-in-out infinite;
+}
+
+/* 타이핑 애니메이션 */
+@keyframes typewriter {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes blink-caret {
+  0%,
+  50% {
+    border-color: transparent;
+  }
+  51%,
+  100% {
+    border-color: currentColor;
+  }
+}
+
+.message-typewriter {
+  overflow: hidden;
+  border-right: 2px solid currentColor;
+  white-space: nowrap;
+  animation:
+    typewriter 2s steps(40, end),
+    blink-caret 0.75s step-end infinite;
+}
+
+.message-typewriter-slow {
+  overflow: hidden;
+  border-right: 2px solid currentColor;
+  white-space: nowrap;
+  animation:
+    typewriter 3s steps(60, end),
+    blink-caret 0.75s step-end infinite;
+}

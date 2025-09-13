@@ -1,2 +1,1 @@
-# checky-FE
-checky frontend
+# Checky
