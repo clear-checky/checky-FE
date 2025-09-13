@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import sendbtn from '../assets/sendbtn.svg';
+import * as api from '../api/api';
 
 interface Message {
   id: number;
@@ -7,6 +8,13 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
 }
+
+// Message를 ChatMessage로 변환하는 헬퍼 함수
+const messageToChatMessage = (msg: Message): api.ChatMessage => ({
+  role: msg.isUser ? 'user' : 'assistant',
+  content: msg.text,
+  timestamp: msg.timestamp.toISOString(),
+});
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
@@ -36,7 +44,7 @@ export default function ChatPage() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (inputText.trim()) {
       const newMessage: Message = {
         id: Date.now(),
@@ -44,20 +52,74 @@ export default function ChatPage() {
         isUser: true,
         timestamp: new Date(),
       };
+
       setMessages(prev => [...prev, newMessage]);
       setInputText('');
       setIsTyping(true);
 
-      setTimeout(() => {
+      try {
+        // 현재 메시지들을 ChatMessage 형태로 변환 (undefined content 제거)
+        const conversationHistory = [...messages, newMessage]
+          .filter(msg => msg.text && msg.text.trim() !== '') // 빈 메시지 제거
+          .map(messageToChatMessage);
+
+        let response;
+        try {
+          // 먼저 'message' 필드로 시도
+          response = await api.askChecky(inputText, conversationHistory);
+        } catch (firstError) {
+          console.log('첫 번째 시도 실패, 대안 방법으로 재시도:', firstError);
+          try {
+            // 'question' 필드로 재시도
+            response = await api.askCheckyAlt(inputText, conversationHistory);
+          } catch (secondError) {
+            console.log(
+              '두 번째 시도 실패, 세 번째 방법으로 재시도:',
+              secondError
+            );
+            try {
+              // 'history' 필드명으로 재시도
+              response = await api.askCheckyWithHistory(
+                inputText,
+                conversationHistory
+              );
+            } catch (thirdError) {
+              console.log(
+                '세 번째 시도 실패, 간단한 방법으로 재시도:',
+                thirdError
+              );
+              // 가장 간단한 형태로 재시도
+              response = await api.askCheckySimple(inputText);
+            }
+          }
+        }
+
+        // AI 응답을 Message 형태로 변환
+        console.log('Received response:', response);
         const aiResponse: Message = {
           id: Date.now() + 1,
-          text: '죄송합니다. 현재 AI 응답 기능을 구현 중입니다. 곧 더 나은 서비스를 제공해드릴 예정입니다.',
+          text:
+            response.answer || response.message || '응답을 받지 못했습니다.',
           isUser: false,
           timestamp: new Date(),
         };
+
         setMessages(prev => [...prev, aiResponse]);
+      } catch (error) {
+        console.error('채팅 API 호출 실패:', error);
+
+        // 에러 발생 시 기본 메시지 표시
+        const errorResponse: Message = {
+          id: Date.now() + 1,
+          text: '죄송합니다. 현재 서비스에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.',
+          isUser: false,
+          timestamp: new Date(),
+        };
+
+        setMessages(prev => [...prev, errorResponse]);
+      } finally {
         setIsTyping(false);
-      }, 1500);
+      }
     }
   };
 

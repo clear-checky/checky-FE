@@ -13,7 +13,8 @@ function App() {
       <Route element={<MainLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/upload" element={<UploadPage />} />
-        <Route path="/analyze/:taskId" element={<AnalyzePage />} />        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/analyze/:taskId" element={<AnalyzePage />} />{' '}
+        <Route path="/chat" element={<ChatPage />} />
         <Route path="/faq" element={<FaqPage />} />
       </Route>
     </Routes>
