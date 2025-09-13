@@ -1,14 +1,13 @@
-import React from "react";
-import type { RiskLevel } from "./types";
+import type { RiskLevel } from './types';
 
 export default function RiskPill({ risk }: { risk: RiskLevel }) {
   const label =
-    risk === "danger" ? "위험" : risk === "warning" ? "주의" : "안전";
+    risk === 'danger' ? '위험' : risk === 'warning' ? '주의' : '안전';
 
   const styles: Record<RiskLevel, string> = {
-    danger: "bg-red/20 text-red font-semibold",
-    warning: "bg-yellow/20 text-yellow font-semibold",
-    safe: "bg-green/20 text-green font-semibold",
+    danger: 'bg-red/20 text-red font-semibold',
+    warning: 'bg-yellow/20 text-yellow font-semibold',
+    safe: 'bg-green/20 text-green font-semibold',
   };
 
   return (

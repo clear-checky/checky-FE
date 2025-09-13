@@ -1,9 +1,9 @@
-import React from "react";
-import { Download } from "lucide-react";
+import React from 'react';
+import { Download } from 'lucide-react';
 
 export default function DownloadPdfButton({
-  targetRef,        // 현재는 window.print()라서 직접 쓰진 않지만, 나중에 react-to-print로 교체 시 사용
-  label = "분석 리포트 다운로드",
+  targetRef: _targetRef, // 현재는 window.print()라서 직접 쓰진 않지만, 나중에 react-to-print로 교체 시 사용
+  label = '분석 리포트 다운로드',
 }: {
   targetRef?: React.RefObject<HTMLElement>;
   label?: string;

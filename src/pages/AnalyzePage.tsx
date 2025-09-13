@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import SectionHeader from '../components/SectionHeader';
 import ClauseCard from '../components/ClauseCard';

@@ -9,7 +9,7 @@ interface FileUploadAreaProps {
   onFileInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   uploadedFile: File | null;
   onRemoveFile: () => void;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   isUploading?: boolean;
 }
 

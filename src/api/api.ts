@@ -22,6 +22,8 @@ export interface AnalyzeResponse {
   articles: Article[];
   counts: { danger: number; warning: number; safe: number; total: number };
   safety_percent: number;
+  title?: string;
+  file_name?: string;
 }
 
 export interface ChatMessage {

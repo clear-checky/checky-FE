@@ -3,10 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
   uploadFile,
   checkAnalysisStatus,
-  getAnalysisResult,
   parseContractToArticles,
   analyzeSentences,
-  saveAnalysisResult,
 } from '../api/uploadApi';
 import FileUploadArea from '../components/FileUploadArea';
 import LoadingModal from '../components/LoadingModal';

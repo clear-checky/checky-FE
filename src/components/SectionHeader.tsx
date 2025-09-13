@@ -1,5 +1,4 @@
-import React from "react";
-import RiskCounterButtons from "./RiskCounterButtons";
+import RiskCounterButtons from './RiskCounterButtons';
 
 type Counts = { danger: number; warning: number; safe: number };
 

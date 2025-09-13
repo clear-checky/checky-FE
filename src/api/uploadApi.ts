@@ -44,7 +44,7 @@ const mockUploadFile = async (file: File) => {
   };
 };
 
-const mockCheckAnalysisStatus = async (taskId: string) => {
+const mockCheckAnalysisStatus = async (_taskId: string) => {
   // 실제 API 호출을 시뮬레이션
   await new Promise(resolve => setTimeout(resolve, 500));
 
