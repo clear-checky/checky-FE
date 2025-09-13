@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowRightCircle } from "lucide-react";
 import DownloadPdfButton from "./DownloadPdfButton";
 
 export default function SafetyScoreBar({
@@ -14,16 +16,74 @@ export default function SafetyScoreBar({
   downloadTargetRef?: React.RefObject<HTMLElement>; // ✅ 부모에서 내려주는 인쇄 타깃
   onAskClick?: () => void;                           // ✅ 체키에 물어보기 액션(선택)
 }) {
+  const navigate = useNavigate();
   const total = Math.max(danger + warning + safe, 1);
   const w = (n: number) => (n / total) * 100;
+
+  // 애니메이션을 위한 상태
+  const [isAnimated, setIsAnimated] = useState(false);
+  const barRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // 화면에 보이기 시작하면 애니메이션 시작
+            setIsAnimated(false); // 먼저 리셋
+            setTimeout(() => {
+              setIsAnimated(true);
+            }, 50);
+          } else {
+            // 화면에서 벗어나면 애니메이션 리셋
+            setIsAnimated(false);
+          }
+        });
+      },
+      {
+        threshold: 0.1, // 10% 보이면 트리거
+        rootMargin: '0px 0px -50px 0px' // 하단에서 50px 전에 트리거
+      }
+    );
+
+    if (barRef.current) {
+      observer.observe(barRef.current);
+    }
+
+    return () => {
+      if (barRef.current) {
+        observer.unobserve(barRef.current);
+      }
+    };
+  }, []);
+
+  const handleAskClick = () => {
+    if (onAskClick) {
+      onAskClick();
+    } else {
+      navigate('/chat');
+    }
+  };
 
   return (
     <div>
       {/* 누적 막대 */}
-      <div className="flex h-20 w-full overflow-hidden rounded-[10px] border border-light-gray/70 bg-white">
-        <div className="h-full bg-red/80" style={{ width: `${w(danger)}%` }} title={`위험 ${danger}`} />
-        <div className="h-full bg-yellow/80" style={{ width: `${w(warning)}%` }} title={`주의 ${warning}`} />
-        <div className="h-full bg-green/80" style={{ width: `${w(safe)}%` }} title={`안전 ${safe}`} />
+      <div ref={barRef} className="flex h-20 w-full overflow-hidden rounded-[10px] border border-light-gray/70 bg-white shadow-sm">
+        <div
+          className="h-full bg-red/80 transition-all duration-1000 ease-out hover:bg-red/90 hover:shadow-lg"
+          style={{ width: isAnimated ? `${w(danger)}%` : '0%' }}
+          title={`위험 ${danger}`}
+        />
+        <div
+          className="h-full bg-yellow/80 transition-all duration-1000 ease-out delay-200 hover:bg-yellow/90 hover:shadow-lg"
+          style={{ width: isAnimated ? `${w(warning)}%` : '0%' }}
+          title={`주의 ${warning}`}
+        />
+        <div
+          className="h-full bg-green/80 transition-all duration-1000 ease-out delay-400 hover:bg-green/90 hover:shadow-lg"
+          style={{ width: isAnimated ? `${w(safe)}%` : '0%' }}
+          title={`안전 ${safe}`}
+        />
       </div>
 
       {/* 하단 라벨 */}
@@ -38,17 +98,16 @@ export default function SafetyScoreBar({
         <DownloadPdfButton targetRef={downloadTargetRef} label="분석 리포트 다운로드" />
       </div>
 
-      <div className="mt-3 flex items-center justify-center">
+      <div className="mt-5 flex items-center justify-center">
         <button
           type="button"
-          onClick={onAskClick}
-          className="inline-flex items-center gap-2 text-black font-semibold"
+          onClick={handleAskClick}
+          className="group relative inline-flex items-center gap-2 text-black font-semibold text-lg px-6 py-2 rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 cursor-pointer"
         >
-          <span>내 계약서 안의 궁금한 내용, 체키에 물어보기</span>
-          {/* 화살표 아이콘 */}
-          <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M7.293 4.293a1 1 0 011.414 0L14 9.586a1 1 0 010 1.414l-5.293 5.293a1 1 0 01-1.414-1.414L10.586 11H4a1 1 0 110-2h6.586L7.293 5.707a1 1 0 010-1.414z" />
-          </svg>
+          <span className="relative z-10 text-[16px]">계약서 안의 궁금한 내용, 체키에 물어보기</span>
+          <ArrowRightCircle className="h-6 w-6 relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
+          {/* 호버 시 왼쪽에서 오른쪽으로 움직이는 초록색 배경 */}
+          <div className="absolute inset-0 bg-green/80 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></div>
         </button>
       </div>
     </div>

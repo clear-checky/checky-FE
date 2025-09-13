@@ -200,7 +200,7 @@ export function getAnalysisStatus(taskId: string) {
 // 3) 결과 조회 → AnalyzeResponse 형태라면 그대로 UI에 사용 가능
 export function getAnalysisResult(taskId: string) {
   return request<AnalyzeResponse>(
-    `/analysis/result/${encodeURIComponent(taskId)}`,
+    `/upload/analysis/${encodeURIComponent(taskId)}`,
     { method: 'GET' }
   );
 }

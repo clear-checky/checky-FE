@@ -2,12 +2,14 @@ interface LoadingModalProps {
   isOpen: boolean;
   progress: number;
   onClose: () => void;
+  stage?: 'uploading' | 'parsing' | 'analyzing' | 'completed';
 }
 
 export default function LoadingModal({
   isOpen,
   progress,
   onClose,
+  stage = 'uploading',
 }: LoadingModalProps) {
   if (!isOpen) return null;
 
@@ -40,7 +42,10 @@ export default function LoadingModal({
           Checky
         </div>
         <div className="text-gray mb-8">
-          체키가 당신의 계약서를 분석 중입니다.
+          {stage === 'uploading' && '파일을 업로드하고 있습니다...'}
+          {stage === 'parsing' && '텍스트를 문장별로 분리하고 있습니다...'}
+          {stage === 'analyzing' && '체키가 당신의 계약서를 분석 중입니다.'}
+          {stage === 'completed' && '분석이 완료되었습니다!'}
         </div>
         <div className="w-full bg-gray/20 rounded-full h-4 mb-2">
           <div
@@ -49,7 +54,7 @@ export default function LoadingModal({
           ></div>
         </div>
         <div className="text-gray">
-          {progress < 100 ? `분석 중... ${progress}%` : '분석 완료!'}
+          {stage === 'completed' ? '분석완료!' : `${progress}%`}
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@ interface FileUploadAreaProps {
   uploadedFile: File | null;
   onRemoveFile: () => void;
   fileInputRef: React.RefObject<HTMLInputElement>;
+  isUploading?: boolean;
 }
 
 export default function FileUploadArea({
@@ -22,6 +23,7 @@ export default function FileUploadArea({
   uploadedFile,
   onRemoveFile,
   fileInputRef,
+  isUploading = false,
 }: FileUploadAreaProps) {
   return (
     <div className="space-y-6">
@@ -57,7 +59,7 @@ export default function FileUploadArea({
         <button
           type="button"
           onClick={onFileButtonClick}
-          className="bg-secondary text-white px-6 py-3 rounded-[10px] font-semibold hover:opacity-90 transition-opacity"
+          className="bg-secondary text-white px-6 py-3 rounded-[10px] font-semibold hover:opacity-90 transition-opacity cursor-pointer"
         >
           파일선택
         </button>
@@ -96,13 +98,22 @@ export default function FileUploadArea({
               </div>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onRemoveFile}
-            className="text-gray hover:text-red transition-colors"
-          >
-            삭제
-          </button>
+          <div className="flex items-center mr-2">
+            {isUploading ? (
+              <div className="text-base text-gray flex items-center space-x-2">
+                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                <span>업로드 중</span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={onRemoveFile}
+                className="text-base text-gray hover:text-red transition-colors cursor-pointer"
+              >
+                삭제
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
