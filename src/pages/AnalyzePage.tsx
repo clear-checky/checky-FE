@@ -35,6 +35,7 @@ export default function AnalyzePage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string>('계약서');
 
   // API → taskId가 있으면 결과 조회
   useEffect(() => {
@@ -46,12 +47,33 @@ export default function AnalyzePage() {
         if (location.state && location.state.parsedArticles) {
           console.log('UploadPage에서 전달받은 데이터 사용:', location.state);
           console.log('parsedArticles 구조:', location.state.parsedArticles);
+          console.log('전달받은 fileName:', location.state.fileName);
           setArticles(location.state.parsedArticles as Article[]);
+          // 파일명 설정 (확장자 제거)
+          if (location.state.fileName) {
+            const fileNameWithoutExt = location.state.fileName.replace(
+              /\.[^/.]+$/,
+              ''
+            );
+            console.log('fileName 설정:', fileNameWithoutExt);
+            setFileName(fileNameWithoutExt);
+          } else {
+            console.log('fileName이 없어서 기본값 사용');
+          }
         } else if (taskId) {
           // 백엔드 파이프라인 결과 사용
           const res = await getAnalysisResult(taskId);
           console.log('백엔드에서 받은 데이터 구조:', res);
+          console.log('백엔드에서 받은 file_name:', res.file_name);
           setArticles(res.articles as Article[]);
+          // 백엔드에서 받은 파일명 설정 (확장자 제거)
+          if (res.file_name) {
+            const fileNameWithoutExt = res.file_name.replace(/\.[^/.]+$/, '');
+            console.log('백엔드 file_name 설정:', fileNameWithoutExt);
+            setFileName(fileNameWithoutExt);
+          } else {
+            console.log('백엔드에서 file_name이 없어서 기본값 사용');
+          }
         } else {
           // taskId가 없으면 에러 표시
           setErrMsg(
@@ -89,9 +111,7 @@ export default function AnalyzePage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-5xl px-6 py-10">
-        <h1 className="text-3xl font-extrabold text-black mb-6">
-          아르바이트 근로 계약서
-        </h1>
+        <h1 className="text-3xl font-extrabold text-black mb-6">{fileName}</h1>
 
         {errMsg && (
           <div className="mb-4 rounded-[10px] bg-red/10 p-3 text-sm text-red">

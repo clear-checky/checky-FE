@@ -122,7 +122,10 @@ export default function UploadPage() {
             setLoadingProgress(70);
 
             // AI 분석 수행 - 단순한 문장 배열로 전송
-            const analysisResult = await analyzeSentences(parsedArticles);
+            const analysisResult = await analyzeSentences(
+              parsedArticles,
+              uploadResult.file_name
+            );
             console.log('문장별 분석 결과:', analysisResult);
 
             // 백엔드에서 받은 분석 결과로 문장들의 risk 값 업데이트
@@ -184,7 +187,10 @@ export default function UploadPage() {
             setLoadingProgress(70);
 
             // AI 분석 수행 - 단순한 문장 배열로 전송
-            const analysisResult = await analyzeSentences(parsedArticles);
+            const analysisResult = await analyzeSentences(
+              parsedArticles,
+              uploadResult.file_name
+            );
             console.log('문장별 분석 결과:', analysisResult);
 
             // 백엔드에서 받은 분석 결과로 문장들의 risk 값 업데이트
